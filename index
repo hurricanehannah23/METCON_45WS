@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Metcon Briefing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: ops console matching the 45 WS dashboard. Sticky header + tab rail, one panel per Metcon briefing item, in briefing order. */
+:root{
+  --bg:#0b1114; --panel:#121a1e; --raised:#1a252b; --line:#222e35; --line2:#2d3b43;
+  --fg:#d8e2e7; --muted:#81919a; --dim:#56656e;
+  --accent:#e9a23b; --ok:#3bc98a; --warn:#f0c24a; --strong:#ff8a3d; --crit:#ff5161; --info:#6cb6ff;
+  --s1:#e9a23b; --s2:#6cb6ff; --s3:#3bc98a; --s4:#c58cff; --s5:#ff7aa8;
+  --f-ui:"IBM Plex Sans Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  color-scheme:dark;
+}
+/* Light board: a paper-white console for bright briefing rooms */
+:root.light{
+  --bg:#eef2f4; --panel:#ffffff; --raised:#f4f7f8; --line:#d6dee2; --line2:#bfcbd1;
+  --fg:#13212a; --muted:#52646e; --dim:#7b8b94;
+  --accent:#b8690a; --ok:#14865a; --warn:#e2aa16; --strong:#d05e14; --crit:#cf2c3d; --info:#1d6cc0;
+  --s1:#c47a0c; --s2:#1d6cc0; --s3:#14865a; --s4:#7d45c9; --s5:#c63a72;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:14px/1.45 var(--f-ui);padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px));padding-bottom:max(28px,env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--info)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.hrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:10px 0 8px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto;min-width:0}
+.brand h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.01em}
+.brand .sub{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.clock{display:flex;gap:14px;font-family:var(--f-mono);font-size:13px}
+.clock b{color:var(--muted);font-weight:500;margin-right:5px;font-size:11px}
+.btn{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:6px 11px;cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1206;font-weight:600}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.tab:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:thin;margin:0 -2px}
+.tab{flex:none;background:none;border:0;border-bottom:3px solid transparent;padding:8px 11px 7px;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px;letter-spacing:.04em;white-space:nowrap}
+.tab .n{font-family:var(--f-mono);font-size:10px;color:var(--dim);margin-right:6px}
+.tab:hover{color:var(--fg)}
+a.tab{text-decoration:none;display:inline-block}
+.tab.ext{color:var(--info)}
+.pvform{display:grid;gap:10px 12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));align-items:end}
+.pvform label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.pvform select,.pvform input{width:100%}
+.pvform .btn{text-align:center;text-decoration:none;padding:8px 12px}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.tab[aria-selected="true"] .n{color:var(--accent)}
+
+main{padding-top:14px}
+.view{display:grid;gap:14px}
+.vh{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.vh h2{margin:0;font-size:18px;font-weight:700;letter-spacing:.02em;text-wrap:balance}
+.vh .meta{color:var(--muted);font-size:12px;font-family:var(--f-mono)}
+.vh .act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+section.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;min-width:0;display:flex;flex-direction:column}
+.ph{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;padding:9px 12px;border-bottom:1px solid var(--line)}
+.ph h3{margin:0;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-right:auto}
+.ph .meta{color:var(--muted);font-size:12px}
+.pb{padding:12px;min-width:0}
+.grid2{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.grid3{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:var(--panel)}
+td.num,th.num{text-align:right}
+td{font-variant-numeric:tabular-nums}
+td.m{font-family:var(--f-mono);font-size:12.5px}
+td.wrap{white-space:normal;min-width:180px}
+tr:last-child td{border-bottom:0}
+.empty{color:var(--muted);padding:18px 12px;text-align:center;font-size:13px}
+.err{color:var(--crit)}
+
+.pill{display:inline-block;font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.05em;padding:2px 7px;border-radius:2px;border:1px solid var(--line2);color:var(--muted)}
+.pill.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+.pill.warn{color:#1c1503;background:var(--warn);border-color:var(--warn)}
+.pill.crit{color:#fff;background:var(--crit);border-color:var(--crit)}
+.pill.info{color:var(--info);border-color:color-mix(in srgb,var(--info) 50%,transparent)}
+.src{font-size:11px;color:var(--dim);font-family:var(--f-mono)}
+
+/* Past 24 h station cards */
+.stations{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.stn .ph h3 small{font-family:var(--f-mono);color:var(--muted);font-weight:500;letter-spacing:.04em;margin-left:6px}
+.kvs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv{padding:9px 10px;border:1px solid var(--line);border-radius:3px;background:var(--bg);display:flex;flex-direction:column;gap:2px;min-width:0}
+.kv span{color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.kv b{font-family:var(--f-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;line-height:1.15}
+.kv b small{font-size:12px;color:var(--muted);font-weight:400;margin-left:2px}
+.kv i{font-style:normal;color:var(--dim);font-size:11px;font-family:var(--f-mono)}
+.ltg{grid-column:1/-1;display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--line);border-left:6px solid var(--ok);border-radius:3px;background:var(--bg)}
+.ltg.yes{border-left-color:var(--crit);background:color-mix(in srgb,var(--crit) 10%,var(--bg))}
+.ltg .t{font-weight:700;letter-spacing:.04em}
+.ltg .d{color:var(--muted);font-size:12px;margin-right:auto}
+.ltg select{background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:3px 6px;font-size:12px}
+.sumrow{display:flex;flex-wrap:wrap;gap:8px}
+.sum{flex:1 1 150px;padding:9px 12px;border:1px solid var(--line);border-radius:3px;background:var(--panel)}
+.sum span{display:block;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.sum b{font-family:var(--f-mono);font-size:20px;font-weight:500}
+.sum em{font-style:normal;color:var(--muted);font-size:12px;margin-left:6px}
+
+/* Product imagery */
+.imgcell{display:flex;flex-direction:column;min-width:0}
+.imgcell .cap{display:flex;justify-content:space-between;gap:8px;padding:7px 10px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)}
+.imgcell .cap b{color:var(--fg);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.imgbox{position:relative;background:#fff;display:flex;align-items:center;justify-content:center;min-height:200px}
+.imgbox img{display:block;width:100%;height:auto;max-width:100%}
+.imgbox .fail{position:absolute;inset:0;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-size:13px;text-align:center;padding:16px}
+.quad{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:1px;background:var(--line)}
+.quad .imgcell{background:var(--panel)}
+
+.ctrl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:12px;color:var(--muted)}
+.ctrl label{display:inline-flex;align-items:center;gap:6px}
+select,input[type=text],input[type=url],input[type=datetime-local],textarea{background:var(--bg);border:1px solid var(--line);border-radius:3px;padding:5px 8px;font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.seg button{background:none;border:0;padding:4px 10px;cursor:pointer;color:var(--muted);font-size:12px}
+.seg button.on{background:var(--line2);color:var(--fg)}
+
+/* AFD */
+.imp textarea{display:block;width:100%;min-height:calc(100vh - 230px);min-height:calc(100dvh - 230px);resize:vertical;border:0;border-radius:4px;background:var(--panel);color:var(--fg);padding:20px 24px;font:500 28px/1.45 var(--f-ui);letter-spacing:.005em}
+.imp textarea::placeholder{color:var(--dim)}
+.imp textarea:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.impconfirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--crit);border-radius:4px;background:var(--panel)}
+.afdnav{display:flex;flex-wrap:wrap;gap:6px}
+
+canvas.chart{width:100%;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:14px;height:3px;border-radius:2px}
+
+.mdbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.mdl{color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase;min-width:4.5em}
+.seg.wrap{flex-wrap:wrap}
+.windy{overflow:hidden}
+.windy iframe{display:block;width:100%;height:min(72vh,720px);min-height:420px;border:0}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
+/* wall mode: header hidden, current briefing item fills the screen, floating control bar */
+.wallbar{display:none}
+body.wall{font-size:16px;padding-top:max(64px,env(safe-area-inset-top,0px))}
+body.wall header{display:none}
+body.wall .wallbar{display:flex;flex-wrap:wrap;position:fixed;z-index:40;top:max(10px,env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));left:max(10px,env(safe-area-inset-left,0px));justify-content:flex-end;align-items:center;gap:8px;padding:6px 8px 6px 12px;border-radius:10px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(6px);border:1px solid var(--line)}
+.wbclock{font:600 15px var(--f-mono);font-variant-numeric:tabular-nums} .wbclock b{color:var(--muted);font-size:11px;margin-right:6px}
+.wbtab{font-weight:700;letter-spacing:.04em;min-width:10ch;text-align:center;margin-right:auto;order:-1;font-size:18px}
+.wbcyc{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.wbcyc select{padding:2px 4px;font-size:12px}
+body.wall main{padding-top:0}
+body.wall .vh h2{font-size:26px}
+body.wall .vh .meta{font-size:14px}
+body.wall table{font-size:16px}
+body.wall th{font-size:13px}
+body.wall .kv b{font-size:30px} body.wall .kv span{font-size:13px}
+body.wall .sum b{font-size:28px} body.wall .sum span{font-size:13px}
+body.wall .ltg .t{font-size:18px}
+body.wall .next .t,body.wall .next .c{font-size:26px}
+body.wall .imp textarea{font-size:36px;min-height:calc(100vh - 170px);min-height:calc(100dvh - 170px)}
+body.wall #impClear{display:none}
+body.wall .windy iframe{height:calc(100vh - 230px);height:calc(100dvh - 230px)}
+body.wall .note,body.wall form.add,body.wall .del{display:none}
+body.wall section.panel:has(#addForm){display:none}
+/* prog charts: fit the whole chart on screen so hours can be clicked through without scrolling */
+#pgBox{min-height:0;background:var(--panel)}
+#pgBox img{width:auto;max-width:100%;max-height:calc(100vh - 290px);max-height:calc(100dvh - 290px);min-height:300px;object-fit:contain;margin:0 auto}
+body.wall #pgBox img{max-height:calc(100vh - 220px);max-height:calc(100dvh - 220px)}
+#v-guidance .note{display:none}
+/* Launch form */
+form.add{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));align-items:end}
+form.add label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+form.add input{width:100%}
+.del{background:none;border:0;color:var(--dim);cursor:pointer;font-size:12px}
+.del:hover{color:var(--crit)}
+tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.next{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;padding:12px 14px;border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:4px;background:var(--panel)}
+.next .k{color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.next .t{font-size:18px;font-weight:700}
+.next .c{font-family:var(--f-mono);font-size:18px;color:var(--accent);margin-left:auto}
+
+.linkcard{display:flex;flex-direction:column;gap:10px;max-width:640px}
+.linkrow{display:flex;gap:8px;flex-wrap:wrap}
+.linkrow input{flex:1 1 260px}
+.quick{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr))}
+.quick a{display:block;padding:9px 11px;border:1px solid var(--line);border-radius:3px;background:var(--bg);text-decoration:none;color:var(--fg);font-size:13px}
+.quick a:hover{border-color:var(--accent)}
+.quick a small{display:block;color:var(--muted);font-size:11px}
+.note{color:var(--muted);font-size:12px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="brand"><h1>Metcon</h1><span class="sub">45 WS daily weather &amp; ops brief</span></div>
+    <div class="clock"><span><b>Z</b><span id="clkZ">--:--</span></span><span><b>ET</b><span id="clkL">--:--</span></span></div>
+    <div class="hbtns">
+      <button class="btn" id="btnTheme" type="button" aria-pressed="false" title="Switch light / dark">Light</button>
+      <button class="btn" id="btnWall" type="button" aria-pressed="false" title="Wall mode: full-screen layout for the briefing screen">Wall</button>
+      <button class="btn primary" id="refreshAll" type="button">Refresh all</button>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Metcon briefing items" id="tabs"></nav>
+</header>
+
+<div class="wallbar" id="wallBar" aria-label="Wall mode controls">
+  <span class="wbclock"><b>Z</b><span id="wbZ">--:--:--</span></span>
+  <span class="wbclock"><b>ET</b><span id="wbL">--:--</span></span>
+  <button type="button" class="btn sm" id="wbPrev" aria-label="Previous tab">&#9664;</button>
+  <span class="wbtab" id="wbTab"></span>
+  <button type="button" class="btn sm" id="wbNext" aria-label="Next tab">&#9654;</button>
+  <label class="wbcyc"><input type="checkbox" id="wbCycle"> Rotate <select id="wbSecs"><option value="30">30 s</option><option value="60" selected>60 s</option><option value="120">2 min</option></select></label>
+  <button type="button" class="btn sm" id="wbTheme">Light</button>
+  <button type="button" class="btn sm" id="wbExit">Exit wall mode</button>
+</div>
+<main>
+<!-- 1 Launch schedule -->
+<div class="view" id="v-launch" role="tabpanel" hidden>
+  <div class="vh"><h2>Launch Schedule</h2><span class="meta" id="llMeta"></span>
+    <div class="act"><button class="btn sm" type="button" id="llRefresh">Refresh</button></div></div>
+  <div id="nextLaunch"></div>
+  <section class="panel">
+    <div class="ph"><h3>Upcoming — CCSFS &amp; KSC</h3><span class="src">Launch Library 2 + local entries</span></div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>NET (Z)</th><th>NET (ET)</th><th>Vehicle</th><th>Mission</th><th>Pad</th><th>Window</th><th>Status</th><th></th></tr></thead>
+      <tbody id="llBody"><tr><td colspan="8" class="empty">Loading launches…</td></tr></tbody>
+    </table></div>
+  </section>
+  <section class="panel">
+    <div class="ph"><h3>Add an operation</h3><span class="meta">For ops not in the public feed (static fires, hazardous ops, range support). Saved in this browser.</span></div>
+    <form class="add pb" id="addForm">
+      <label>NET (local ET)<input type="datetime-local" id="fNet" required></label>
+      <label>Vehicle / op<input type="text" id="fVeh" placeholder="Falcon 9" required></label>
+      <label>Mission<input type="text" id="fMis" placeholder="Starlink 12-4"></label>
+      <label>Pad<input type="text" id="fPad" placeholder="SLC-40"></label>
+      <label>Window / notes<input type="text" id="fNote" placeholder="4 hr window"></label>
+      <button class="btn primary" type="submit">Add</button>
+    </form>
+  </section>
+</div>
+
+<!-- 2 Past 24 h -->
+<div class="view" id="v-obs" role="tabpanel" hidden>
+  <div class="vh"><h2>Past 24 Hours</h2><span class="meta" id="obsMeta"></span>
+    <div class="act"><button class="btn sm" type="button" id="obsRefresh">Refresh</button></div></div>
+  <div class="sumrow" id="obsSummary"></div>
+  <div class="stations" id="stations"></div>
+  <p class="note">Precip is the sum of hourly METAR precip groups; stations without a precip sensor show "—". Lightning is auto-flagged from TS/LTG in the METARs. Set it from CGLSS or the lightning network with the selector, which overrides the auto flag for this briefing.</p>
+</div>
+
+<!-- 3 Impacts -->
+<div class="view" id="v-impacts" role="tabpanel" hidden>
+  <div class="vh"><h2>Impacts</h2><span class="meta" id="impMeta"></span>
+    <div class="act"><button class="btn sm" type="button" id="impClear">Clear</button></div></div>
+  <div class="impconfirm" id="impConfirm" hidden>Clear today's notes? <button class="btn sm" type="button" id="impYes">Clear notes</button><button class="btn sm" type="button" id="impNo">Keep</button></div>
+  <section class="panel imp"><textarea id="impText" spellcheck="true" aria-label="Big-picture notes for the brief"
+    placeholder="Big picture for today's brief: the pattern, what drives our weather, and the impacts to ops (lightning, winds, ceilings, launches)…"></textarea></section>
+</div>
+
+<!-- 4 Model analysis quad -->
+<div class="view" id="v-analysis" role="tabpanel" hidden>
+  <div class="vh"><h2>Model Analysis — Sfc to 500 mb</h2><span class="meta">SPC RAP-based mesoanalysis, current hour</span>
+    <div class="act ctrl">
+      <label>Sector <select id="mesoSector"><option value="18">Southeast (s18)</option><option value="19">CONUS (s19)</option></select></label>
+      <button class="btn sm" type="button" id="quadRefresh">Refresh</button>
+      <a class="btn sm" href="https://www.spc.noaa.gov/exper/mesoanalysis/" target="_blank" rel="noopener">SPC mesoanalysis</a></div></div>
+  <section class="panel"><div class="quad" id="quad"></div></section>
+  <p class="note">For forecast hours, use <a href="https://mag.ncep.noaa.gov/" target="_blank" rel="noopener">NCEP MAG</a> (GFS/NAM/RAP 4-panel products).</p>
+</div>
+
+<!-- 5 Skew-T -->
+<div class="view" id="v-skewt" role="tabpanel" hidden>
+  <div class="vh"><h2>Skew-T</h2><span class="meta" id="skewMeta"></span>
+    <div class="act ctrl">
+      <label>Site <select id="skewSite">
+        <option value="XMR">XMR — Cape Canaveral</option><option value="TBW">TBW — Tampa Bay</option>
+        <option value="JAX">JAX — Jacksonville</option><option value="MFL">MFL — Miami</option></select></label>
+      <label>Cycle <select id="skewCycle"></select></label>
+      <a class="btn sm" id="skewOpen" target="_blank" rel="noopener" href="https://www.spc.noaa.gov/exper/soundings/">SPC soundings</a></div></div>
+  <section class="panel imgcell" style="max-width:900px">
+    <div class="imgbox" id="skewBox"></div>
+  </section>
+  <p class="note">The XMR raob is not always in the SPC index; when it's missing, use TBW/JAX or the <a id="uwyoLink" href="https://weather.uwyo.edu/upperair/sounding.html" target="_blank" rel="noopener">UWyo 74794 sounding</a>.</p>
+</div>
+
+<!-- 6 Prog charts -->
+<div class="view" id="v-guidance" role="tabpanel" hidden>
+  <div class="vh"><h2>Prog Charts</h2><span class="meta" id="pgMeta">WPC surface progs via AWC</span>
+    <div class="act ctrl">
+      <button class="btn sm" type="button" id="pgPrev" aria-label="Previous forecast hour">&#9664;</button>
+      <button class="btn sm" type="button" id="pgPlay">Loop</button>
+      <button class="btn sm" type="button" id="pgNext" aria-label="Next forecast hour">&#9654;</button>
+      <button class="btn sm" type="button" id="pgRefresh">Refresh</button>
+      <a class="btn sm" href="https://aviationweather.gov/gfa/#progchart" target="_blank" rel="noopener">Open AWC GFA</a></div></div>
+  <div class="tablewrap"><div class="seg" id="pgHours" style="flex-wrap:nowrap"></div></div>
+  <section class="panel imgcell">
+    <div class="cap"><b id="pgTitle">Analysis</b><span id="pgValid"></span></div>
+    <div class="imgbox" id="pgBox"></div>
+  </section>
+  <p class="note">Use ◀ ▶ or the arrow keys on this tab to step through hours. Analysis updates every 3 h; days 1–2 progs update each WPC cycle, and days 3–7 twice daily.</p>
+</div>
+
+<!-- 6b Models (Windy) -->
+<div class="view" id="v-models" role="tabpanel" hidden>
+  <div class="vh"><h2>Models</h2><span class="meta" id="mdMeta"></span>
+    <div class="act"><a class="btn sm" id="mdOpen" href="https://www.windy.com/" target="_blank" rel="noopener">Open in Windy</a>
+      <a class="btn sm" href="https://mag.ncep.noaa.gov/" target="_blank" rel="noopener">NCEP MAG charts</a></div></div>
+  <div class="mdbar"><span class="mdl">Model</span><div class="seg" id="mdModel" role="group" aria-label="Model"></div></div>
+  <div class="mdbar"><span class="mdl">Layer</span><div class="seg wrap" id="mdLayer" role="group" aria-label="Layer"></div></div>
+  <div class="mdbar ctrl">
+    <label>Level <select id="mdLevel"></select></label>
+    <label>View <select id="mdView">
+      <option value="28.45,-80.6,8">Cape / KSC</option><option value="28.3,-81.2,7">Central Florida</option>
+      <option value="30.456,-83.0,6">Southeast</option><option value="27.5,-79.5,5">SE US &amp; Atlantic</option></select></label>
+    <label><input type="checkbox" id="mdDetail" checked> Cape forecast panel</label>
+    <span id="mdNote" style="color:var(--dim)"></span>
+  </div>
+  <section class="panel windy"><iframe id="mdFrame" title="Windy model map" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></section>
+  <p class="note">Map by <a href="https://www.windy.com/" target="_blank" rel="noopener">Windy.com</a>. Use the timeline at the bottom of the map to step through forecast hours; drag and zoom the map freely. The switches above rebuild the map.</p>
+</div>
+
+<!-- 7 Meteogram -->
+<div class="view" id="v-meteogram" role="tabpanel" hidden>
+  <div class="vh"><h2>Meteogram — Cape Canaveral</h2><span class="meta" id="mgMeta"></span>
+    <div class="act ctrl">
+      <div class="seg" id="mgSpan"><button type="button" data-h="48" class="on">48 h</button><button type="button" data-h="72">72 h</button><button type="button" data-h="120">5 d</button></div>
+      <button class="btn sm" type="button" id="mgRefresh">Refresh</button></div></div>
+  <section class="panel">
+    <div class="ph"><h3>NWS MLB gridded forecast</h3><div class="legend">
+      <span><i class="sw" style="background:var(--strong)"></i>Temp °F</span><span><i class="sw" style="background:var(--ok)"></i>Dewpoint °F</span>
+      <span><i class="sw" style="background:var(--info)"></i>Wind kt</span><span><i class="sw" style="background:var(--crit)"></i>Gust kt</span>
+      <span><i class="sw" style="background:var(--s4)"></i>PoP %</span><span><i class="sw" style="background:var(--muted)"></i>Sky %</span></div></div>
+    <div class="pb"><canvas class="chart" id="mgChart" height="520"></canvas></div>
+  </section>
+</div>
+
+<!-- 8 SPC -->
+<div class="view" id="v-spc" role="tabpanel" hidden>
+  <div class="vh"><h2>SPC Convective Outlook</h2><span class="meta">Categorical, Days 1–3 · Day 1 probabilistic</span>
+    <div class="act"><button class="btn sm" type="button" id="spcRefresh">Refresh</button>
+      <a class="btn sm" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">SPC outlooks</a></div></div>
+  <section class="panel"><div class="quad" id="spcCat"></div></section>
+  <section class="panel"><div class="ph"><h3>Day 1 probabilities</h3></div><div class="quad" id="spcProb"></div></section>
+</div>
+
+<!-- 8 Pivotal Weather -->
+<div class="view" id="v-pivotal" role="tabpanel" hidden>
+  <div class="vh"><h2>Pivotal Weather</h2><span class="meta">Pick a model, product and region, then open it on Pivotal Weather</span></div>
+  <section class="panel"><div class="pb pvform">
+    <label>Model<select id="pvModel"></select></label>
+    <label>Product<select id="pvProd"></select></label>
+    <label>Region<select id="pvReg"></select></label>
+    <label>Forecast hour<input type="number" id="pvFh" min="0" max="384" step="1" value="24"></label>
+    <a class="btn primary" id="pvGo" target="_blank" rel="noopener" href="https://www.pivotalweather.com/model.php">Open on Pivotal Weather</a>
+  </div></section>
+  <section class="panel"><div class="ph"><h3>Metcon shortcuts</h3><span class="meta">Latest run, Southeast US</span></div>
+    <div class="pb quick" id="pvQuick"></div></section>
+  <p class="note">Pivotal Weather doesn't allow its viewer to be shown inside other sites, so these open it in a new tab already set to your selection. It remembers your last choices.</p>
+</div>
+
+<!-- 12 References -->
+<div class="view" id="v-refs" role="tabpanel" hidden>
+  <div class="vh"><h2>References</h2></div>
+  <section class="panel"><div class="ph"><h3>Quick references</h3></div>
+    <div class="pb quick">
+      <a href="https://www.weather.gov/mlb/" target="_blank" rel="noopener">NWS Melbourne<small>weather.gov/mlb</small></a>
+      <a href="https://radar.weather.gov/station/kmlb/standard" target="_blank" rel="noopener">KMLB radar<small>radar.weather.gov</small></a>
+      <a href="https://www.nhc.noaa.gov/" target="_blank" rel="noopener">National Hurricane Center<small>nhc.noaa.gov</small></a>
+      <a href="https://www.wpc.ncep.noaa.gov/" target="_blank" rel="noopener">WPC<small>wpc.ncep.noaa.gov</small></a>
+      <a href="https://aviationweather.gov/" target="_blank" rel="noopener">Aviation Weather Center<small>aviationweather.gov</small></a>
+      <a href="https://www.patrick.spaceforce.mil/About-Us/Weather/" target="_blank" rel="noopener">45 WS<small>patrick.spaceforce.mil</small></a>
+    </div></section>
+</div>
+</main>
+
+<script>
+(() => {
+"use strict";
+const NAV=[["launch","Launch Schedule"],["obs","Past 24 h"],["impacts","Impacts"],["analysis","Model Analysis"],["skewt","Skew-T"],["guidance","Prog Charts"],["models","Windy"],["pivotal","Pivotal Weather"],["meteogram","Meteogram"],["spc","SPC Outlook"],["planning","Planning Forecast","https://45thweathersquadron.nebula.spaceforce.mil/pages/planningAndAviationForecastProducts.html"],["refs","References"]];
+const TABS=NAV.filter(t=>!t[2]);
+const CAPE={lat:28.4884,lon:-80.5778};
+const STATIONS=[{id:"KTTS",name:"KSC",full:"Shuttle Landing Facility"},{id:"KXMR",name:"Cape",full:"Cape Canaveral SFS"},{id:"KCOF",name:"Patrick SFB",full:"Patrick SFB"}];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k,d){try{const v=localStorage.getItem("metcon:"+k);return v==null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem("metcon:"+k,JSON.stringify(v))}catch{}}};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const pad=n=>String(n).padStart(2,"0");
+const fmtZ=d=>`${pad(d.getUTCDate())}/${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}Z`;
+const fmtL=d=>d.toLocaleString("en-US",{timeZone:"America/New_York",weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",hour12:false});
+const fmtLT=d=>d.toLocaleTimeString("en-US",{timeZone:"America/New_York",hour:"2-digit",minute:"2-digit",hour12:false});
+const stamp=()=>`updated ${fmtZ(new Date())}`;
+async function getJSON(url,opt={}){const r=await fetch(url,{headers:{Accept:opt.accept||"application/geo+json, application/json"},cache:"no-store"});if(!r.ok)throw new Error(`${r.status} ${r.statusText}`);return r.json()}
+const kmh2kt=v=>v==null?null:v*0.539957, c2f=v=>v==null?null:v*9/5+32, mm2in=v=>v==null?null:v/25.4;
+
+/* ---------- clock ---------- */
+function tick(){const d=new Date();$("#clkZ").textContent=`${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}`;$("#clkL").textContent=fmtLT(d)}
+tick();setInterval(tick,15000);
+
+/* ---------- tabs ---------- */
+const loaded={};
+const loaders={};
+const nav=$("#tabs");
+NAV.forEach(([id,label,href],i)=>{
+  if(href){const a=document.createElement("a");a.className="tab ext";a.href=href;a.target="_blank";a.rel="noopener";a.title="Opens in a new tab";a.innerHTML=`<span class="n">${pad(i+1)}</span>${label} <span aria-hidden="true">↗</span>`;nav.appendChild(a);return}
+  const b=document.createElement("button");b.className="tab";b.type="button";b.role="tab";b.id="t-"+id;b.setAttribute("aria-controls","v-"+id);b.innerHTML=`<span class="n">${pad(i+1)}</span>${label}`;b.onclick=()=>show(id,true);nav.appendChild(b)});
+function show(id,push){
+  if(!TABS.some(t=>t[0]===id))id="launch";
+  TABS.forEach(([t])=>{$("#v-"+t).hidden=t!==id;$("#t-"+t).setAttribute("aria-selected",t===id)});
+  $("#t-"+id).scrollIntoView({block:"nearest",inline:"nearest"});
+  if(push){try{history.replaceState(null,"","#"+id)}catch{} store.set("tab",id)}
+  if(!loaded[id]&&loaders[id]){loaded[id]=true;loaders[id]()}
+  else if(id==="meteogram")drawMeteogram();
+}
+nav.addEventListener("keydown",e=>{if(!/Arrow(Left|Right)/.test(e.key))return;const ids=TABS.map(t=>t[0]);const cur=ids.findIndex(t=>$("#t-"+t).getAttribute("aria-selected")==="true");const n=ids[(cur+(e.key==="ArrowRight"?1:-1)+ids.length)%ids.length];show(n,true);$("#t-"+n).focus()});
+
+/* ---------- image helper ---------- */
+function imgCell(title,src,href){
+  const cell=document.createElement("div");cell.className="imgcell";
+  cell.innerHTML=`<div class="cap"><b>${esc(title)}</b><a href="${esc(href||src)}" target="_blank" rel="noopener">open</a></div><div class="imgbox"></div>`;
+  setImg(cell.querySelector(".imgbox"),src,href);return cell;
+}
+function setImg(box,src,href){
+  box.innerHTML="";const img=new Image();img.alt="";img.loading="lazy";img.decoding="async";
+  img.src=src+(src.includes("?")?"&":"?")+"_="+Math.floor(Date.now()/60000);
+  img.onerror=()=>{box.innerHTML=`<div class="fail">Image not available yet<a href="${esc(href||src)}" target="_blank" rel="noopener">Open the product page</a></div>`};
+  box.appendChild(img);
+}
+
+/* ---------- 1 launch schedule ---------- */
+const LL_URLS=["https://ll.thespacedevs.com/2.3.0/launches/upcoming/?location__ids=12,27&limit=20&mode=normal","https://ll.thespacedevs.com/2.2.0/launch/upcoming/?location__ids=12,27&limit=20&mode=normal"];
+let llData=[];
+async function loadLaunches(force){
+  $("#llMeta").textContent="loading…";
+  const cache=store.get("ll",null);
+  if(!force&&cache&&Date.now()-cache.t<30*60e3){llData=cache.d;renderLaunches(`cached ${fmtZ(new Date(cache.t))}`);return}
+  let err;
+  for(const u of LL_URLS){try{const j=await getJSON(u,{accept:"application/json"});llData=(j.results||[]).map(r=>({
+      net:r.net,ws:r.window_start,we:r.window_end,veh:r.rocket?.configuration?.name||r.rocket?.configuration?.full_name||"",
+      mis:r.mission?.name||r.name,orbit:r.mission?.orbit?.abbrev||"",pad:r.pad?.name||"",prov:r.launch_service_provider?.name||"",
+      st:r.status?.abbrev||"",stn:r.status?.name||""}));
+      store.set("ll",{t:Date.now(),d:llData});renderLaunches(stamp());return}catch(e){err=e}}
+  if(cache){llData=cache.d;renderLaunches(`feed unavailable (${err.message}); showing cache from ${fmtZ(new Date(cache.t))}`)}
+  else{llData=[];renderLaunches(`feed unavailable: ${err.message}`)}
+}
+function statusPill(st,stn){const s=(st||"").toUpperCase();const cls=s==="GO"?"ok":s==="HOLD"||s==="FAILURE"?"crit":s==="TBC"?"warn":s==="IN FLIGHT"||s==="SUCCESS"?"info":"";return `<span class="pill ${cls}" title="${esc(stn)}">${esc(st||"—")}</span>`}
+function renderLaunches(meta){
+  $("#llMeta").textContent=meta;
+  const manual=store.get("manual",[]).map((m,i)=>({...m,manual:true,idx:i}));
+  const now=Date.now()-6*3600e3;
+  const rows=[...llData,...manual].filter(r=>new Date(r.net).getTime()>now).sort((a,b)=>new Date(a.net)-new Date(b.net));
+  const tb=$("#llBody");
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="8" class="empty">No upcoming launches listed. Add operations below.</td></tr>`;$("#nextLaunch").innerHTML="";return}
+  tb.innerHTML=rows.map(r=>{const d=new Date(r.net);let win=r.note||"";
+    if(!r.manual&&r.ws&&r.we){const a=new Date(r.ws),b=new Date(r.we);const mins=Math.round((b-a)/60000);win=mins<=0?"instantaneous":`${fmtLT(a)}–${fmtLT(b)} ET (${mins>=60?(mins/60).toFixed(mins%60?1:0)+" h":mins+" min"})`}
+    return `<tr class="${r.manual?"manual":""}"><td class="m">${fmtZ(d)}</td><td class="m">${esc(fmtL(d))}</td><td>${esc(r.veh)}${r.prov?`<div class="src">${esc(r.prov)}</div>`:""}</td><td class="wrap">${esc(r.mis)}${r.orbit?` <span class="src">${esc(r.orbit)}</span>`:""}</td><td>${esc(r.pad)}</td><td class="m">${esc(win)}</td><td>${r.manual?'<span class="pill">LOCAL</span>':statusPill(r.st,r.stn)}</td><td>${r.manual?`<button class="del" type="button" data-i="${r.idx}" aria-label="Remove">Remove</button>`:""}</td></tr>`}).join("");
+  const n=rows.find(r=>new Date(r.net).getTime()>Date.now());
+  if(n){const d=new Date(n.net);$("#nextLaunch").innerHTML=`<div class="next"><span class="k">Next</span><span class="t">${esc(n.veh)} · ${esc(n.mis)}</span><span class="mono">${esc(n.pad)} · ${fmtZ(d)} / ${esc(fmtL(d))} ET</span><span class="c" id="countdown"></span></div>`;nextAt=d.getTime();cd()}
+}
+let nextAt=0;function cd(){const el=$("#countdown");if(!el||!nextAt)return;let s=Math.max(0,Math.round((nextAt-Date.now())/1000));const d=Math.floor(s/86400);s%=86400;el.textContent=`T−${d?d+"d ":""}${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`}
+setInterval(cd,1000);
+$("#llBody").addEventListener("click",e=>{const b=e.target.closest(".del");if(!b)return;const m=store.get("manual",[]);m.splice(+b.dataset.i,1);store.set("manual",m);renderLaunches($("#llMeta").textContent)});
+$("#addForm").addEventListener("submit",e=>{e.preventDefault();const v=$("#fNet").value;if(!v)return;
+  const d=etLocalToDate(v);const m=store.get("manual",[]);m.push({net:d.toISOString(),veh:$("#fVeh").value.trim(),mis:$("#fMis").value.trim(),pad:$("#fPad").value.trim(),note:$("#fNote").value.trim()});store.set("manual",m);e.target.reset();renderLaunches($("#llMeta").textContent)});
+function etLocalToDate(v){ // interpret datetime-local as America/New_York
+  const guess=new Date(v+"Z");const off=etOffsetMin(guess);return new Date(guess.getTime()-off*60000)}
+function etOffsetMin(d){const p=new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).formatToParts(d).reduce((a,x)=>(a[x.type]=x.value,a),{});
+  return (Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute)-Math.floor(d.getTime()/60000)*60000)/60000}
+loaders.launch=()=>loadLaunches(false);
+$("#llRefresh").onclick=()=>loadLaunches(true);
+
+/* ---------- 2 past 24 h ---------- */
+let obsResults={};
+async function loadObs(){
+  $("#obsMeta").textContent="loading…";
+  const end=new Date(),start=new Date(end-24*3600e3);
+  $("#stations").innerHTML=STATIONS.map(s=>`<section class="panel stn" id="stn-${s.id}"><div class="ph"><h3>${s.name}<small>${s.id}</small></h3><span class="meta">${s.full}</span></div><div class="pb"><div class="empty">Loading observations…</div></div></section>`).join("");
+  await Promise.all(STATIONS.map(async s=>{
+    try{const j=await getJSON(`https://api.weather.gov/stations/${s.id}/observations?start=${start.toISOString()}&end=${end.toISOString()}`);
+      obsResults[s.id]=summarize(j.features.map(f=>f.properties))}catch(e){obsResults[s.id]={error:e.message}}
+    renderStation(s)}));
+  renderObsSummary();
+  $("#obsMeta").textContent=`${fmtZ(start)} – ${fmtZ(end)} · ${stamp()}`;
+}
+function summarize(obs){
+  const r={n:obs.length,maxT:null,minT:null,maxW:null,maxG:null,precip:null,ltg:false,ltgObs:[],tmax:null,tmin:null,tw:null};
+  const hourly={};
+  for(const o of obs){const t=new Date(o.timestamp);const T=c2f(o.temperature?.value);
+    if(T!=null){if(r.maxT==null||T>r.maxT){r.maxT=T;r.tmax=t}if(r.minT==null||T<r.minT){r.minT=T;r.tmin=t}}
+    const W=kmh2kt(o.windSpeed?.value),G=kmh2kt(o.windGust?.value);
+    if(W!=null&&(r.maxW==null||W>r.maxW)){r.maxW=W;r.tw=t;r.wd=o.windDirection?.value}
+    if(G!=null&&(r.maxG==null||G>r.maxG)){r.maxG=G;r.tg=t}
+    const P=o.precipitationLastHour?.value;
+    if(P!=null){const k=t.toISOString().slice(0,13);if(!hourly[k]||t>hourly[k].t)hourly[k]={t,v:P}}
+    const raw=(o.rawMessage||"")+" "+(o.presentWeather||[]).map(w=>w.rawString||"").join(" ");
+    if(/\bTS|VCTS|\bLTG|TSB\d|TSE\d/.test(raw.replace(/^\S+\s+\S+/,"").replace(/\bTSNO\b/g,""))){r.ltg=true;r.ltgObs.push(t)}
+  }
+  const hv=Object.values(hourly);if(hv.length)r.precip=mm2in(hv.reduce((a,b)=>a+b.v,0));
+  return r;
+}
+function renderStation(s){
+  const box=$(`#stn-${s.id} .pb`),r=obsResults[s.id];
+  if(r.error){box.innerHTML=`<div class="empty err">Couldn't load ${s.id}: ${esc(r.error)}</div>`;return}
+  if(!r.n){box.innerHTML=`<div class="empty">No observations from ${s.id} in the last 24 h.</div>`;return}
+  const f=(v,d=0)=>v==null?"—":v.toFixed(d);const when=t=>t?fmtZ(t):"";
+  const ov=store.get("ltg:"+s.id+":"+new Date().toISOString().slice(0,10),"auto");
+  const yes=ov==="yes"||(ov==="auto"&&r.ltg);
+  const ltgDetail=ov!=="auto"?"Set by forecaster":r.ltg?`TS/LTG in ${r.ltgObs.length} ob${r.ltgObs.length>1?"s":""}, last ${fmtZ(r.ltgObs.sort((a,b)=>b-a)[0])}`:"No TS/LTG in METARs";
+  const dirs=["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
+  const wd=r.wd==null?"":dirs[Math.round(r.wd/22.5)%16]+" ";
+  box.innerHTML=`<div class="kvs">
+    <div class="kv"><span>Max temp</span><b>${f(r.maxT)}<small>°F</small></b><i>${when(r.tmax)}</i></div>
+    <div class="kv"><span>Min temp</span><b>${f(r.minT)}<small>°F</small></b><i>${when(r.tmin)}</i></div>
+    <div class="kv"><span>Max wind / gust</span><b>${f(r.maxW)}${r.maxG!=null?"G"+f(r.maxG):""}<small>kt</small></b><i>${wd}${when(r.tg||r.tw)}</i></div>
+    <div class="kv"><span>Precip</span><b>${r.precip==null?"—":r.precip<0.005&&r.precip>0?"T":r.precip.toFixed(2)}<small>${r.precip==null?"":"in"}</small></b><i>${r.n} obs</i></div>
+    <div class="ltg ${yes?"yes":""}"><span class="t">${yes?"LIGHTNING":"NO LIGHTNING"}</span><span class="d">${esc(ltgDetail)}</span>
+      <select aria-label="Lightning for ${s.name}" data-s="${s.id}"><option value="auto"${ov==="auto"?" selected":""}>Auto</option><option value="yes"${ov==="yes"?" selected":""}>Yes</option><option value="no"${ov==="no"?" selected":""}>No</option></select></div></div>`;
+}
+$("#stations").addEventListener("change",e=>{const sel=e.target.closest("select[data-s]");if(!sel)return;store.set("ltg:"+sel.dataset.s+":"+new Date().toISOString().slice(0,10),sel.value);renderStation(STATIONS.find(s=>s.id===sel.dataset.s));renderObsSummary()});
+function renderObsSummary(){
+  const ok=STATIONS.map(s=>({s,r:obsResults[s.id]})).filter(x=>x.r&&!x.r.error&&x.r.n);
+  if(!ok.length){$("#obsSummary").innerHTML="";return}
+  const best=(k,fn)=>ok.filter(x=>x.r[k]!=null).sort((a,b)=>fn(a.r[k],b.r[k]))[0];
+  const hi=best("maxT",(a,b)=>b-a),lo=best("minT",(a,b)=>a-b),pr=best("precip",(a,b)=>b-a);
+  const wn=ok.map(x=>({...x,v:Math.max(x.r.maxW??-1,x.r.maxG??-1)})).sort((a,b)=>b.v-a.v)[0];
+  const ltg=ok.filter(x=>{const ov=store.get("ltg:"+x.s.id+":"+new Date().toISOString().slice(0,10),"auto");return ov==="yes"||(ov==="auto"&&x.r.ltg)}).map(x=>x.s.name);
+  const c=(lab,val,who)=>`<div class="sum"><span>${lab}</span><b>${val}</b>${who?`<em>${who}</em>`:""}</div>`;
+  $("#obsSummary").innerHTML=
+    c("Highest precip",pr?pr.r.precip.toFixed(2)+" in":"—",pr?.s.name)+
+    c("Peak wind",wn&&wn.v>=0?wn.v.toFixed(0)+" kt":"—",wn?.s.name)+
+    c("Max temp",hi?hi.r.maxT.toFixed(0)+"°F":"—",hi?.s.name)+
+    c("Min temp",lo?lo.r.minT.toFixed(0)+"°F":"—",lo?.s.name)+
+    `<div class="sum" style="border-left:6px solid ${ltg.length?"var(--crit)":"var(--ok)"}"><span>Lightning past 24 h</span><b>${ltg.length?"YES":"NO"}</b>${ltg.length?`<em>${esc(ltg.join(", "))}</em>`:""}</div>`;
+}
+loaders.obs=loadObs;$("#obsRefresh").onclick=loadObs;
+
+/* ---------- 3 AFD ---------- */
+/* Impacts notes: autosaved in this browser */
+const impBox=$("#impText");
+function impLoad(){const n=store.get("impacts",null);impBox.value=n?.text||"";impMetaUpd(n?.t)}
+function impMetaUpd(t){$("#impMeta").textContent=t?`saved ${fmtL(new Date(t))} ET`:"autosaves as you type"}
+let impT;impBox.addEventListener("input",()=>{clearTimeout(impT);impT=setTimeout(()=>{const t=Date.now();store.set("impacts",{text:impBox.value,t});impMetaUpd(t)},400)});
+$("#impClear").onclick=()=>{$("#impConfirm").hidden=false};
+$("#impNo").onclick=()=>{$("#impConfirm").hidden=true};
+$("#impYes").onclick=()=>{impBox.value="";store.set("impacts",null);impMetaUpd(null);$("#impConfirm").hidden=true;impBox.focus()};
+impLoad();
+
+/* ---------- 4 analysis quad ---------- */
+const QUAD=[["pmsl","Surface — MSLP & wind"],["850mb","850 mb"],["700mb","700 mb"],["500mb","500 mb"]];
+function loadQuad(){
+  const s=$("#mesoSector").value;store.set("sector",s);
+  const q=$("#quad");q.innerHTML="";
+  QUAD.forEach(([p,t])=>q.appendChild(imgCell(t,`https://www.spc.noaa.gov/exper/mesoanalysis/s${s}/${p}/${p}.gif`,`https://www.spc.noaa.gov/exper/mesoanalysis/new/viewsector.php?sector=${s}`)));
+}
+$("#mesoSector").value=store.get("sector","18");
+$("#mesoSector").onchange=loadQuad;loaders.analysis=loadQuad;$("#quadRefresh").onclick=loadQuad;
+
+/* ---------- 5 skew-t ---------- */
+function cycles(){const out=[];const n=new Date();let t=Date.UTC(n.getUTCFullYear(),n.getUTCMonth(),n.getUTCDate(),n.getUTCHours()>=12?12:0);
+  if(n.getTime()-t<90*60e3)t-=12*3600e3; // data posts ~1.5 h after synoptic time
+  for(let i=0;i<6;i++){out.push(new Date(t));t-=12*3600e3}return out}
+function fillCycles(){const sel=$("#skewCycle");sel.innerHTML=cycles().map((d,i)=>{const v=`${String(d.getUTCFullYear()).slice(2)}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}${pad(d.getUTCHours())}`;return `<option value="${v}">${pad(d.getUTCHours())}Z ${pad(d.getUTCDate())} ${d.toLocaleString("en-US",{month:"short",timeZone:"UTC"})}${i===0?" (latest)":""}</option>`}).join("")}
+function loadSkew(){
+  const site=$("#skewSite").value,cyc=$("#skewCycle").value;store.set("skew",site);
+  const page=`https://www.spc.noaa.gov/exper/soundings/${cyc}_OBS/`;
+  $("#skewOpen").href=page;$("#skewMeta").textContent=`${site} · ${cyc.slice(6)}Z ${cyc.slice(4,6)}/${cyc.slice(2,4)}`;
+  const y="20"+cyc.slice(0,2),m=cyc.slice(2,4),d=cyc.slice(4,6),h=cyc.slice(6);
+  $("#uwyoLink").href=`https://weather.uwyo.edu/cgi-bin/sounding?region=naconf&TYPE=GIF%3ASKEWT&YEAR=${y}&MONTH=${m}&FROM=${d}${h}&TO=${d}${h}&STNM=74794`;
+  setImg($("#skewBox"),`${page}${site}.gif`,page);
+}
+$("#skewSite").value=store.get("skew","XMR");
+$("#skewSite").onchange=loadSkew;$("#skewCycle").onchange=loadSkew;
+loaders.skewt=()=>{fillCycles();loadSkew()};
+
+/* ---------- chart helper ---------- */
+function setupCanvas(cv){const dpr=window.devicePixelRatio||1;const w=cv.clientWidth,h=+cv.getAttribute("height");cv.style.height=h+"px";cv.width=w*dpr;cv.height=h*dpr;const g=cv.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.font=`11px ${css("--f-mono")}`;return {g,w,h}}
+function niceTicks(lo,hi,n=5){if(lo===hi){lo-=1;hi+=1}const span=hi-lo,step0=span/n,mag=10**Math.floor(Math.log10(step0)),step=[1,2,2.5,5,10].map(m=>m*mag).find(s=>s>=step0);const a=Math.floor(lo/step)*step,b=Math.ceil(hi/step)*step;const t=[];for(let v=a;v<=b+step/2;v+=step)t.push(+v.toFixed(6));return t}
+/* panel: {top,height,series:[{pts:[[ms,v]],color,width,dash,bars}],yMin,yMax,label} */
+function timeChart(cv,t0,t1,panels){
+  const {g,w,h}=setupCanvas(cv);const L=44,R=10,X=ms=>L+(ms-t0)/(t1-t0)*(w-L-R);
+  g.clearRect(0,0,w,h);
+  const line=css("--line"),muted=css("--muted"),dim=css("--dim");
+  // day separators & time labels at bottom
+  const lastPanel=panels[panels.length-1];const axisY=lastPanel.top+lastPanel.height;
+  const hrStep=(t1-t0)/3600e3>80?12:6;
+  for(let t=Math.ceil(t0/3600e3/hrStep)*hrStep*3600e3;t<=t1;t+=hrStep*3600e3){const d=new Date(t),x=X(t);const lh=+d.toLocaleString("en-US",{timeZone:"America/New_York",hour:"numeric",hour12:false})%24;
+    g.strokeStyle=lh===0?css("--line2"):line;g.lineWidth=lh===0?1.5:1;g.beginPath();g.moveTo(x,panels[0].top);g.lineTo(x,axisY);g.stroke();
+    g.fillStyle=muted;g.textAlign="center";g.fillText(`${pad(d.getUTCHours())}Z`,x,axisY+13);
+    if(lh===0||t===Math.ceil(t0/3600e3/hrStep)*hrStep*3600e3){g.fillStyle=dim;g.fillText(d.toLocaleDateString("en-US",{timeZone:"America/New_York",weekday:"short",day:"numeric"}),x,axisY+26)}}
+  // now line
+  const now=Date.now();if(now>t0&&now<t1){g.strokeStyle=css("--accent");g.setLineDash([3,3]);g.beginPath();g.moveTo(X(now),panels[0].top);g.lineTo(X(now),axisY);g.stroke();g.setLineDash([])}
+  for(const p of panels){
+    let vals=p.series.flatMap(s=>s.pts.map(q=>q[1])).filter(v=>v!=null);
+    let lo=p.yMin??Math.min(...vals),hi=p.yMax??Math.max(...vals);if(!vals.length){lo=0;hi=1}
+    const ticks=niceTicks(lo,hi,p.height>140?5:3);lo=p.yMin??ticks[0];hi=p.yMax??ticks[ticks.length-1];
+    const Y=v=>p.top+p.height-(v-lo)/(hi-lo)*p.height;
+    g.textAlign="right";
+    for(const tv of ticks){if(tv<lo-1e-9||tv>hi+1e-9)continue;const y=Y(tv);g.strokeStyle=line;g.lineWidth=1;g.beginPath();g.moveTo(L,y);g.lineTo(w-R,y);g.stroke();g.fillStyle=muted;g.fillText(String(tv),L-6,y+4)}
+    if(p.label){g.textAlign="left";g.fillStyle=css("--fg");g.fillText(p.label,L+4,p.top+12)}
+    for(const s of p.series){const pts=s.pts.filter(q=>q[1]!=null&&q[0]>=t0&&q[0]<=t1);if(!pts.length)continue;
+      g.strokeStyle=s.color;g.fillStyle=s.color;
+      if(s.bars){const bw=Math.max(1,(w-L-R)/((t1-t0)/3600e3)*0.8);g.globalAlpha=s.alpha??0.55;for(const [t,v] of pts){const y=Y(v);g.fillRect(X(t)-bw/2,y,bw,Y(lo)-y)}g.globalAlpha=1;continue}
+      if(s.area){g.globalAlpha=0.18;g.beginPath();g.moveTo(X(pts[0][0]),Y(lo));pts.forEach(([t,v])=>g.lineTo(X(t),Y(v)));g.lineTo(X(pts[pts.length-1][0]),Y(lo));g.closePath();g.fill();g.globalAlpha=1}
+      g.lineWidth=s.width||2;g.setLineDash(s.dash||[]);g.beginPath();pts.forEach(([t,v],i)=>i?g.lineTo(X(t),Y(v)):g.moveTo(X(t),Y(v)));g.stroke();g.setLineDash([]);
+      if(s.thresholds)for(const [tv,col] of s.thresholds){if(tv>hi)continue;g.strokeStyle=col;g.setLineDash([6,4]);g.lineWidth=1;g.beginPath();g.moveTo(L,Y(tv));g.lineTo(w-R,Y(tv));g.stroke();g.setLineDash([])}
+    }
+  }
+}
+
+/* ---------- 6 prog charts (AWC / WPC) ---------- */
+const PROGS=[0,6,12,18,24,30,36,48,60,72,96,120,144];
+const progSrc=h=>`https://aviationweather.gov/data/products/progs/F${String(h).padStart(3,"0")}_wpc_${h===0?"sfc":"prog"}.gif`;
+let pgIdx=0,pgTimer=null;const pgCache={};
+$("#pgHours").innerHTML=PROGS.map((h,i)=>`<button type="button" data-i="${i}">${h===0?"Analysis":h<=60?h+" h":"Day "+(h/24)}</button>`).join("");
+function showProg(i){pgIdx=(i+PROGS.length)%PROGS.length;const h=PROGS[pgIdx];
+  [...$("#pgHours").children].forEach((b,j)=>b.classList.toggle("on",j===pgIdx));
+  $("#pgTitle").textContent=h===0?"Surface analysis":`${h} h surface prog`;
+  const box=$("#pgBox");const img=pgCache[h];
+  if(img&&img.complete&&img.naturalWidth){box.innerHTML="";box.appendChild(img)}else setImg(box,progSrc(h),"https://aviationweather.gov/gfa/#progchart");
+  $("#pgValid").textContent=h===0?"latest analysis":`F${String(h).padStart(3,"0")} from latest WPC cycle`}
+function preloadProgs(){const m=Math.floor(Date.now()/60000);PROGS.forEach(h=>{const im=new Image();im.alt="";im.src=progSrc(h)+"?_="+m;pgCache[h]=im})}
+function loadProgs(){preloadProgs();showProg(pgIdx);$("#pgMeta").textContent="WPC surface progs via AWC · "+stamp()}
+function stopLoop(){clearInterval(pgTimer);pgTimer=null;$("#pgPlay").textContent="Loop"}
+$("#pgHours").addEventListener("click",e=>{const b=e.target.closest("button");if(b){stopLoop();showProg(+b.dataset.i)}});
+$("#pgPrev").onclick=()=>{stopLoop();showProg(pgIdx-1)};$("#pgNext").onclick=()=>{stopLoop();showProg(pgIdx+1)};
+$("#pgPlay").onclick=()=>{if(pgTimer){stopLoop();return}$("#pgPlay").textContent="Stop";pgTimer=setInterval(()=>showProg(pgIdx+1),1200)};
+document.addEventListener("keydown",e=>{if($("#v-guidance").hidden||/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName)||document.activeElement?.closest("#tabs"))return;
+  if(e.key==="ArrowRight"){stopLoop();showProg(pgIdx+1)}else if(e.key==="ArrowLeft"){stopLoop();showProg(pgIdx-1)}});
+loaders.guidance=loadProgs;$("#pgRefresh").onclick=loadProgs;
+
+/* ---------- 6b models (Windy embed) ---------- */
+const W_MODELS=[["ecmwf","ECMWF"],["gfs","GFS"],["namConus","NAM 3 km"],["hrrrConus","HRRR"]];
+const W_LAYERS=[["rain","Rain, thunder"],["wind","Wind"],["gust","Gusts"],["temp","Temperature"],["dewpoint","Dew point"],["cape","CAPE"],["clouds","Clouds"],["visibility","Visibility"],["pressure","Pressure"],["waves","Waves"],["swell1","Swell"]];
+const W_LEVELS=[["surface","Surface"],["850h","850 mb"],["700h","700 mb"],["500h","500 mb"],["300h","300 mb"],["250h","250 mb"],["200h","200 mb"]];
+const UPPER_OK=["wind","temp","dewpoint","clouds"]; // layers Windy offers aloft
+const WAVE=["waves","swell1"];
+let wd={model:store.get("w.model","ecmwf"),layer:store.get("w.layer","rain"),level:store.get("w.level","surface"),view:store.get("w.view","30.456,-83.0,6"),detail:store.get("w.detail",true)};
+$("#mdModel").innerHTML=W_MODELS.map(([k,l])=>`<button type="button" data-k="${k}">${l}</button>`).join("");
+$("#mdLayer").innerHTML=W_LAYERS.map(([k,l])=>`<button type="button" data-k="${k}">${l}</button>`).join("");
+$("#mdLevel").innerHTML=W_LEVELS.map(([k,l])=>`<option value="${k}">${l}</option>`).join("");
+if(!W_MODELS.some(m=>m[0]===wd.model))wd.model="ecmwf";
+$("#mdView").value=wd.view;$("#mdDetail").checked=wd.detail;
+function windyRender(){
+  const isWave=WAVE.includes(wd.layer);
+  let product=wd.model,note="";
+  if(isWave){product=wd.model==="gfs"?"gfsWaves":"ecmwfWaves";if(!["ecmwf","gfs"].includes(wd.model))note="Waves use the ECMWF wave model."}
+  if(!UPPER_OK.includes(wd.layer)&&wd.level!=="surface"){wd.level="surface";note=note||"That layer is surface-only."}
+  $("#mdLevel").value=wd.level;$("#mdLevel").disabled=!UPPER_OK.includes(wd.layer);
+  [...$("#mdModel").children].forEach(b=>b.classList.toggle("on",b.dataset.k===wd.model));
+  [...$("#mdLayer").children].forEach(b=>b.classList.toggle("on",b.dataset.k===wd.layer));
+  const [lat,lon,zoom]=wd.view.split(",");
+  const q=new URLSearchParams({type:"map",location:"coordinates",metricRain:"in",metricTemp:"°F",metricWind:"kt",zoom,overlay:wd.layer,product,level:wd.level,lat,lon,
+    detailLat:"28.49",detailLon:"-80.58",detail:String(wd.detail),marker:"true",message:"true",calendar:"now",pressure:wd.layer==="pressure"||wd.layer==="rain"?"true":"",type2:""});
+  for(const [k,v] of [...q])if(v==="")q.delete(k);
+  const src="https://embed.windy.com/embed.html?"+q.toString();
+  if($("#mdFrame").src!==src)$("#mdFrame").src=src;
+  $("#mdOpen").href=`https://www.windy.com/?${wd.layer},${product},${wd.level},${lat},${lon},${zoom}`;
+  $("#mdNote").textContent=note;
+  $("#mdMeta").textContent=`${W_MODELS.find(m=>m[0]===wd.model)[1]} · ${W_LAYERS.find(l=>l[0]===wd.layer)[1]} · ${W_LEVELS.find(l=>l[0]===wd.level)[1]}`;
+  store.set("w.model",wd.model);store.set("w.layer",wd.layer);store.set("w.level",wd.level);store.set("w.view",wd.view);store.set("w.detail",wd.detail);
+}
+$("#mdModel").addEventListener("click",e=>{const b=e.target.closest("button");if(b){wd.model=b.dataset.k;windyRender()}});
+$("#mdLayer").addEventListener("click",e=>{const b=e.target.closest("button");if(b){wd.layer=b.dataset.k;windyRender()}});
+$("#mdLevel").onchange=()=>{wd.level=$("#mdLevel").value;windyRender()};
+$("#mdView").onchange=()=>{wd.view=$("#mdView").value;windyRender()};
+$("#mdDetail").onchange=()=>{wd.detail=$("#mdDetail").checked;windyRender()};
+loaders.models=windyRender;
+
+/* ---------- 8 Pivotal Weather launcher ---------- */
+const PV_MODELS=[["gfs","GFS"],["ecmwf_full","ECMWF"],["ecmwf_aifs","ECMWF-AIFS"],["aigfs","AIGFS"],["icon","ICON"],["gdps","GDPS (Canadian)"],["ukmo_global","UKMET"],["nam","NAM"],["nam4km","NAM 3 km"],["rap","RAP"],["hrrr","HRRR"],["rrfs","RRFS"],["hrwfv3","HRW FV3"],["hrwarw","HRW WRF-ARW"],["gefsens","GEFS (ens)"],["epsens","EPS (ens)"]];
+const PV_PRODS=[["prateptype_cat-imp","Precip type, rate"],["refcmp","Composite reflectivity"],["sfcwind_mslp","MSLP, 10 m wind"],["sfct-imp","2 m temperature"],["sfct_b-imp","2 m temp, wind barbs"],["sfctd-imp","2 m dew point"],["sfcrh","2 m RH"],["qpf_006h-imp","6 h QPF"],["qpf_024h-imp","24 h QPF"],["qpf_acc-imp","Total QPF"],["pwat","Precipitable water"],["cloudcover","Cloud cover"],["925wh","925 mb height, wind"],["850th","850 mb temp, height, wind"],["850rh","850 mb RH, wind"],["700rh","700 mb RH, wind"],["500hv","500 mb height, vorticity"],["500wh","500 mb height, wind"],["500h_anom","500 mb height anomaly"],["300wh","300 mb height, wind"],["200wh","200 mb height, wind"]];
+const PV_REGS=[["us_se","Southeast US"],["conus","CONUS"],["gom","Gulf of Mexico"],["watl","West Atlantic"],["swatl","SW Atlantic"],["caribbean","Caribbean"],["na","North America"]];
+const pvUrl=(m,p,r,fh)=>`https://www.pivotalweather.com/model.php?m=${m}&p=${p}&rh=latest&fh=${fh}&r=${r}`;
+const opt=(a)=>a.map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join("");
+$("#pvModel").innerHTML=opt(PV_MODELS);$("#pvProd").innerHTML=opt(PV_PRODS);$("#pvReg").innerHTML=opt(PV_REGS);
+const pv=store.get("pv",{m:"gfs",p:"prateptype_cat-imp",r:"us_se",fh:24});
+$("#pvModel").value=pv.m;$("#pvProd").value=pv.p;$("#pvReg").value=pv.r;$("#pvFh").value=pv.fh;
+function pvUpdate(){const v={m:$("#pvModel").value,p:$("#pvProd").value,r:$("#pvReg").value,fh:Math.max(0,parseInt($("#pvFh").value,10)||0)};store.set("pv",v);$("#pvGo").href=pvUrl(v.m,v.p,v.r,v.fh)}
+["#pvModel","#pvProd","#pvReg","#pvFh"].forEach(id=>$(id).addEventListener("input",pvUpdate));pvUpdate();
+$("#pvQuick").innerHTML=[["hrrr","refcmp",6,"HRRR reflectivity"],["nam4km","prateptype_cat-imp",12,"NAM 3 km precip type"],["gfs","prateptype_cat-imp",24,"GFS precip type"],["ecmwf_full","prateptype_cat-imp",24,"ECMWF precip type"],["hrrr","sfcwind_mslp",6,"HRRR MSLP & wind"],["gfs","500hv",24,"GFS 500 mb vorticity"],["ecmwf_full","500hv",48,"ECMWF 500 mb vorticity"],["gfs","850th",24,"GFS 850 mb temp"],["gfs","qpf_acc-imp",168,"GFS total QPF"],["ecmwf_full","qpf_acc-imp",168,"ECMWF total QPF"],["gfs","pwat",24,"GFS precipitable water"],["nam","700rh",24,"NAM 700 mb RH"]]
+  .map(([m,p,fh,l])=>`<a href="${pvUrl(m,p,"us_se",fh)}" target="_blank" rel="noopener">${esc(l)}<small>F${String(fh).padStart(3,"0")} · Southeast</small></a>`).join("");
+
+/* ---------- 7 meteogram (NWS grid) ---------- */
+let mg=null,mgSpan=48;
+function expandGrid(prop,conv){const out=[];if(!prop?.values)return out;
+  for(const {validTime,value} of prop.values){const [s,dur]=validTime.split("/");const t0=Date.parse(s);const m=dur.match(/P(?:(\d+)D)?T?(?:(\d+)H)?/);const hrs=(+(m[1]||0))*24+(+(m[2]||0))||1;
+    for(let i=0;i<hrs;i++)out.push([t0+i*3600e3,value==null?null:conv(value)])}return out}
+async function loadMeteogram(){
+  $("#mgMeta").textContent="loading…";
+  try{const pt=await getJSON(`https://api.weather.gov/points/${CAPE.lat},${CAPE.lon}`);const grid=await getJSON(pt.properties.forecastGridData);const p=grid.properties;
+    const kmh=p.windSpeed?.uom?.includes("km_h")!==false;
+    mg={T:expandGrid(p.temperature,c2f),D:expandGrid(p.dewpoint,c2f),W:expandGrid(p.windSpeed,v=>kmh?v*0.539957:v),G:expandGrid(p.windGust,v=>kmh?v*0.539957:v),
+        P:expandGrid(p.probabilityOfPrecipitation,v=>v),S:expandGrid(p.skyCover,v=>v),upd:new Date(p.updateTime)};
+    $("#mgMeta").textContent=`${pt.properties.gridId} ${pt.properties.gridX},${pt.properties.gridY} · grid updated ${fmtZ(mg.upd)}`;drawMeteogram();
+  }catch(e){$("#mgMeta").textContent=`Couldn't load the NWS grid: ${e.message}`}
+}
+function drawMeteogram(){if(!mg)return;const cv=$("#mgChart");if(!cv.clientWidth)return;
+  const t0=Math.floor(Date.now()/3600e3)*3600e3-2*3600e3,t1=t0+(mgSpan+2)*3600e3;
+  timeChart(cv,t0,t1,[
+    {top:8,height:190,label:"Temp / dewpoint °F",series:[{pts:mg.T,color:css("--strong"),width:2.5},{pts:mg.D,color:css("--ok"),width:2}]},
+    {top:216,height:150,label:"Wind / gust kt",yMin:0,series:[{pts:mg.W,color:css("--info"),width:2,area:true},{pts:mg.G,color:css("--crit"),width:2,dash:[5,3],thresholds:[[25,css("--warn")],[35,css("--strong")]]}]},
+    {top:384,height:100,label:"PoP / sky %",yMin:0,yMax:100,series:[{pts:mg.S,color:css("--muted"),width:1.5,area:true},{pts:mg.P,color:css("--s4"),bars:true,alpha:.7}]}]);
+}
+$("#mgSpan").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;mgSpan=+b.dataset.h;[...$("#mgSpan").children].forEach(x=>x.classList.toggle("on",x===b));drawMeteogram()});
+loaders.meteogram=loadMeteogram;$("#mgRefresh").onclick=loadMeteogram;
+
+/* ---------- 8 SPC ---------- */
+function loadSPC(){
+  const base="https://www.spc.noaa.gov/products/outlook/";
+  const cat=$("#spcCat");cat.innerHTML="";
+  [["Day 1","day1otlk.gif","day1otlk.html"],["Day 2","day2otlk.gif","day2otlk.html"],["Day 3","day3otlk.gif","day3otlk.html"]].forEach(([t,f,h])=>cat.appendChild(imgCell(t+" categorical",base+f,base+h)));
+  const pr=$("#spcProb");pr.innerHTML="";
+  [["Tornado","day1probotlk_torn.gif"],["Wind","day1probotlk_wind.gif"],["Hail","day1probotlk_hail.gif"]].forEach(([t,f])=>pr.appendChild(imgCell("Day 1 "+t,base+f,base+"day1otlk.html")));
+}
+loaders.spc=loadSPC;$("#spcRefresh").onclick=loadSPC;
+
+/* ---------- refresh all / resize ---------- */
+$("#refreshAll").onclick=()=>{for(const k in loaded)loaded[k]=false;const cur=TABS.find(([t])=>!$("#v-"+t).hidden)[0];show(cur,false);
+  TABS.forEach(([t])=>{if(t!==cur&&loaders[t]&&["launch","obs"].includes(t)){loaded[t]=true;loaders[t]()}})};
+let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{drawMeteogram()},150)});
+// auto-refresh data tabs every 10 min while open
+setInterval(()=>{if(document.hidden)return;const cur=TABS.find(([t])=>!$("#v-"+t).hidden)[0];if(loaders[cur]&&cur!=="link")loaders[cur]()},10*60e3);
+
+/* ---------- theme + wall mode ---------- */
+function applyTheme(mode){document.documentElement.classList.toggle("light",mode==="light");
+  const lbl=mode==="light"?"Dark":"Light";$("#btnTheme").textContent=lbl;$("#wbTheme").textContent=lbl;$("#btnTheme").setAttribute("aria-pressed",String(mode==="light"));
+  store.set("theme",mode);setTimeout(()=>{drawMeteogram()},30)}
+const toggleTheme=()=>applyTheme(document.documentElement.classList.contains("light")?"dark":"light");
+$("#btnTheme").onclick=toggleTheme;$("#wbTheme").onclick=toggleTheme;
+applyTheme(store.get("theme","dark"));
+const curTab=()=>TABS.find(([t])=>!$("#v-"+t).hidden)?.[0]||"launch";
+function stepTab(d){const ids=TABS.map(t=>t[0]);const n=ids[(ids.indexOf(curTab())+d+ids.length)%ids.length];show(n,true);renderWallBar();window.scrollTo(0,0)}
+let wbTimer=null;
+function setCycle(on){clearInterval(wbTimer);wbTimer=null;$("#wbCycle").checked=on;if(on)wbTimer=setInterval(()=>stepTab(1),(+$("#wbSecs").value)*1000)}
+function setWall(on){document.body.classList.toggle("wall",on);$("#btnWall").setAttribute("aria-pressed",String(on));window.scrollTo(0,0);
+  if(on){try{document.documentElement.requestFullscreen?.().catch(()=>{})}catch{}}else{setCycle(false);if(document.fullscreenElement){try{document.exitFullscreen()}catch{}}}
+  renderWallBar();setTimeout(()=>{drawMeteogram()},80)}
+function renderWallBar(){if(!document.body.classList.contains("wall"))return;const d=new Date();
+  $("#wbZ").textContent=`${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}`;$("#wbL").textContent=fmtLT(d);
+  const i=NAV.findIndex(t=>t[0]===curTab());$("#wbTab").textContent=`${pad(i+1)} · ${NAV[i][1]}`}
+setInterval(renderWallBar,1000);
+$("#btnWall").onclick=()=>setWall(!document.body.classList.contains("wall"));
+$("#wbExit").onclick=()=>setWall(false);
+$("#wbPrev").onclick=()=>stepTab(-1);$("#wbNext").onclick=()=>stepTab(1);
+$("#wbCycle").onchange=()=>setCycle($("#wbCycle").checked);$("#wbSecs").onchange=()=>{if($("#wbCycle").checked)setCycle(true)};
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&document.body.classList.contains("wall")){/* stay in wall layout; Esc again or the button exits */}});
+document.addEventListener("keydown",e=>{if(!document.body.classList.contains("wall"))return;if(/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName))return;
+  if(e.key==="Escape")setWall(false);else if(e.key==="PageDown"||e.key===" "&&!e.shiftKey){e.preventDefault();stepTab(1)}else if(e.key==="PageUp"){e.preventDefault();stepTab(-1)}});
+
+
+const hashTab=(location.hash||"").slice(1);const start=(hashTab&&hashTab!=="wall"?hashTab:"")||store.get("tab","launch");
+show(start,false);
+if(location.hash==="#wall")setWall(true);
+// warm the briefing-critical tabs in the background
+["launch","obs"].forEach(t=>{if(!loaded[t]){loaded[t]=true;loaders[t]()}});
+})();
+</script>
+</body>
+</html>
