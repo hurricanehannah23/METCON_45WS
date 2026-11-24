@@ -484,7 +484,7 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 
 <!-- 8 SPC -->
 <div class="view" id="v-spc" role="tabpanel" hidden>
-  <div class="vh"><h2>SPC Convective Outlook</h2><span class="meta">Cape risk from SPC outlook areas · Days 1–3, WPC excessive rainfall, Day 1 probabilities, Days 4–8</span>
+  <div class="vh"><h2>SPC/WPC</h2><span class="meta">Cape risk from SPC outlook areas · Days 1–3, WPC excessive rainfall, Day 1 probabilities, Days 4–8</span>
     <div class="act"><button class="btn sm" type="button" id="spcRefresh">Refresh</button>
       <a class="btn sm" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">SPC outlooks</a></div></div>
   <div class="sumrow" id="spcCape"></div>
@@ -597,7 +597,7 @@ const LOGO_DELTA="data:image/webp;base64,UklGRqIwAABXRUJQVlA4WAoAAAAQAAAA7wAAPwE
 document.querySelectorAll("img.logo-patch").forEach(i=>i.src=LOGO_PATCH);document.querySelectorAll("img.logo-delta").forEach(i=>i.src=LOGO_DELTA);
 
 "use strict";
-const NAV=[["launch","Launch Schedule"],["obs","Past 24 h"],["impacts","Impacts"],["analysis","Model Analysis"],["skewt","Skew-T"],["guidance","Prog Charts"],["models","Windy"],["ncep","SPC Model Viewer"],["meteogram","Meteogram"],["spc","SPC Outlook"],["tropics","Tropics"],["sat","Satellite"],["radar","Radar"],["planning","Planning Forecast","https://45thweathersquadron.nebula.spaceforce.mil/pages/planningAndAviationForecastProducts.html"],["room","Around the Room"],["refs","References"]];
+const NAV=[["launch","Launch Schedule"],["obs","Past 24 h"],["impacts","Impacts"],["analysis","Model Analysis"],["skewt","Skew-T"],["guidance","Prog Charts"],["models","Windy"],["ncep","SPC Model Viewer"],["meteogram","Meteogram"],["spc","SPC/WPC"],["tropics","Tropics"],["sat","Satellite"],["radar","Radar"],["planning","Planning Forecast","https://45thweathersquadron.nebula.spaceforce.mil/pages/planningAndAviationForecastProducts.html"],["room","Around the Room"],["refs","References"]];
 const TABS=NAV.filter(t=>!t[2]);
 const CAPE={lat:28.4884,lon:-80.5778};
 const STATIONS=[{id:"KTTS",name:"KSC",full:"Shuttle Landing Facility"},{id:"KXMR",name:"Cape",full:"Cape Canaveral SFS"},{id:"KCOF",name:"Patrick SFB",full:"Patrick SFB"}];
