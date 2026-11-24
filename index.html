@@ -484,11 +484,15 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 
 <!-- 8 SPC -->
 <div class="view" id="v-spc" role="tabpanel" hidden>
-  <div class="vh"><h2>SPC Convective Outlook</h2><span class="meta">Cape risk from SPC outlook areas · Days 1–3, Day 1 probabilities, Days 4–8</span>
+  <div class="vh"><h2>SPC Convective Outlook</h2><span class="meta">Cape risk from SPC outlook areas · Days 1–3, WPC excessive rainfall, Day 1 probabilities, Days 4–8</span>
     <div class="act"><button class="btn sm" type="button" id="spcRefresh">Refresh</button>
       <a class="btn sm" href="https://www.spc.noaa.gov/products/outlook/" target="_blank" rel="noopener">SPC outlooks</a></div></div>
   <div class="sumrow" id="spcCape"></div>
   <section class="panel"><div class="ph"><h3>Categorical outlooks</h3></div><div class="spcgrid" id="spcCat"></div></section>
+  <section class="panel"><div class="ph"><h3>WPC Excessive Rainfall Outlook</h3>
+    <div class="seg" id="eroArea" role="group" aria-label="ERO area"><button type="button" data-k="se">Southeast</button><button type="button" data-k="conus">CONUS</button></div>
+    <a class="btn sm" href="https://www.wpc.ncep.noaa.gov/qpf/excessive_rainfall_outlook_ero.php" target="_blank" rel="noopener">WPC ERO ↗</a></div>
+    <div class="spcgrid" id="eroGrid"></div></section>
   <section class="panel"><div class="ph"><h3>Day 1 probabilities</h3></div><div class="spcgrid" id="spcProb"></div></section>
   <section class="panel"><div class="ph"><h3>Days 4–8</h3></div><div class="spcgrid one" id="spc48"></div></section>
 </div>
@@ -1400,7 +1404,23 @@ async function loadSPC(){
       el.innerHTML=`<span>Day ${d} · Cape Canaveral</span><b><span class="risk" style="background:${esc(fill)}${best?"":";color:var(--muted)"}">${esc(lbl)}</span></b><em>${esc(txt)}${v?` · ${fmtZ(v)}–${fmtZ(x)}`:""}</em>`}
     catch(e){el.innerHTML=`<span>Day ${d} · Cape</span><b>—</b><em class="err">${esc(e.message)}</em>`}}));
 }
-loaders.spc=loadSPC;$("#spcRefresh").onclick=loadSPC;
+/* WPC Excessive Rainfall Outlook: Days 1-3. WPC posts only CONUS images, so the Southeast view crops each one
+   (800x561) and lays WPC's own valid-time box and category key back over the open ocean / Gulf corners. */
+let eroArea=store.get("eroArea","se");
+const ERO=[[1,"94ewbg"],[2,"98ewbg"],[3,"99ewbg"]],ERO_SE={x:470,y:235,w:320,h:292},ERO_INFO={x:0,y:466,w:254,h:94},ERO_LEG={x:258,y:488,w:316,h:73};
+function eroSE(box,src,href){const im=new Image();im.alt="";
+  im.onload=()=>{const k=2,cv=document.createElement("canvas");cv.width=ERO_SE.w*k;cv.height=ERO_SE.h*k;cv.setAttribute("aria-label","Excessive Rainfall Outlook, Southeast");
+    const g=cv.getContext("2d");g.imageSmoothingQuality="high";g.drawImage(im,ERO_SE.x,ERO_SE.y,ERO_SE.w,ERO_SE.h,0,0,cv.width,cv.height);g.fillStyle="#fff";
+    const s1=1.15,iw=ERO_INFO.w*s1,ih=ERO_INFO.h*s1;g.fillRect(cv.width-iw-8,4,iw+4,ih+4);g.drawImage(im,ERO_INFO.x,ERO_INFO.y,ERO_INFO.w,ERO_INFO.h,cv.width-iw-6,6,iw,ih);
+    const lw=ERO_LEG.w*s1,lh=ERO_LEG.h*s1;g.fillRect(0,cv.height-lh-4,lw+6,lh+4);g.drawImage(im,ERO_LEG.x,ERO_LEG.y,ERO_LEG.w,ERO_LEG.h,2,cv.height-lh-2,lw,lh);
+    box.innerHTML="";cv.style.cssText="display:block;width:100%;height:auto";box.appendChild(cv)};
+  im.onerror=()=>{box.innerHTML=`<div class="fail">Image not available yet<a href="${esc(href)}" target="_blank" rel="noopener">Open WPC</a></div>`};
+  im.src=src+"?_="+Math.floor(Date.now()/600000)}
+function loadERO(){const g=$("#eroGrid");g.innerHTML="";[...$("#eroArea").children].forEach(b=>b.classList.toggle("on",b.dataset.k===eroArea));
+  for(const [d,f] of ERO){const src=`https://www.wpc.ncep.noaa.gov/qpf/${f}.gif`,href="https://www.wpc.ncep.noaa.gov/qpf/excessive_rainfall_outlook_ero.php";
+    const cell=imgCell(`Day ${d} ERO${eroArea==="se"?" · Southeast":""}`,src,href);g.appendChild(cell);if(eroArea==="se")eroSE(cell.querySelector(".imgbox"),src,href)}}
+$("#eroArea").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;eroArea=b.dataset.k;store.set("eroArea",eroArea);loadERO()});
+loaders.spc=()=>{loadSPC();loadERO()};$("#spcRefresh").onclick=()=>{loadSPC();loadERO()};
 
 /* ---------- refresh all / resize ---------- */
 $("#refreshAll").onclick=()=>{for(const k in loaded)loaded[k]=false;const cur=TABS.find(([t])=>!$("#v-"+t).hidden)[0];show(cur,false);
