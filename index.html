@@ -256,7 +256,6 @@ body.wall #quad .imgbox img{max-height:calc((100vh - 200px)/2);max-height:calc((
 .smwrap iframe{display:block;width:100%;height:calc(100vh - 200px);height:calc(100dvh - 200px);min-height:520px;border:0;background:#fff}
 body.wall .smwrap iframe{height:calc(100vh - 140px);height:calc(100dvh - 140px)}
 .smblocked p{margin:0 0 12px;font-size:16px;max-width:75ch}
-.smnote{padding:8px 12px;border:1px solid var(--line);border-left:6px solid var(--warn);border-radius:3px;background:var(--panel);font-size:13px}
 /* Meteogram time-height section (layout after AFW-Bifrost's meteogram) */
 :root{--xs-rh1:#d4ebc8;--xs-rh2:#a6d48f;--xs-rh3:#6fb35a}
 :root:not(.light){--xs-rh1:#2f4a2b;--xs-rh2:#3f6e36;--xs-rh3:#5a9a48}
@@ -279,6 +278,51 @@ body.wall #xsChart{height:calc(100vh - 220px);height:calc(100dvh - 220px)}
 .wsrset{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:end;border-top:1px solid var(--line);padding-top:12px}
 .wsrset label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)} .wsrset input{width:100%} .wsrsb{display:flex;gap:8px}
 .wsrset .note{grid-column:1/-1}
+/* Threat matrix */
+.thwrap{padding:0}
+.thtab{width:100%;border-collapse:separate;border-spacing:6px;font-size:16px}
+.thtab{table-layout:fixed}.thtab thead th:first-child{width:15%}.thtab thead th:last-child{width:22%}
+.thtab th{background:none;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;padding:6px 4px;border:0}
+.thtab th small{display:block;font-family:var(--f-mono);letter-spacing:0;text-transform:none;font-size:12px;color:var(--dim)}
+.thtab td{border:0;padding:0;white-space:normal}
+.thtab td.th-name{font-weight:700;font-size:18px;padding:0 10px;text-align:left;white-space:nowrap}
+.thcell{width:100%;min-height:62px;border-radius:4px;border:1px solid var(--line2);font:700 18px/1 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.thcell:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.thlv,.thcell{background:var(--bg);color:var(--dim)}
+.l1{background:color-mix(in srgb,var(--ok) 28%,var(--panel));color:var(--fg);border-color:var(--ok)}
+.l2{background:var(--warn);color:#1c1503;border-color:var(--warn)}
+.l3{background:var(--crit);color:#fff;border-color:var(--crit)}
+.thnote{width:100%;min-width:180px;background:transparent;border:1px solid transparent;border-radius:3px;padding:6px 8px;font:15px var(--f-ui);color:var(--fg)}
+.thnote:hover,.thnote:focus{border-color:var(--line2);background:var(--bg)}
+.thkey{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.thkey .thlv{padding:4px 10px;border-radius:3px;font:700 12px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line2)}
+.thkey .note{margin-left:8px}
+body.wall .thtab{font-size:20px} body.wall .thcell{min-height:84px;font-size:24px} body.wall .thtab td.th-name{font-size:24px} body.wall .thnote{font-size:19px}
+body.wall .thkey .note,body.wall #thCarry,body.wall #thClear,body.wall #thAutoBtn{display:none}
+.thcell{flex-direction:column;gap:6px;position:relative;padding:8px 6px}.thcell small{font:500 11.5px/1.25 var(--f-mono);letter-spacing:0;text-transform:none;opacity:.8;text-align:center}
+.thcell.man::after{content:"✎";position:absolute;top:4px;right:6px;font-size:13px;opacity:.85}
+.thhowlist{margin:0 0 10px 18px;padding:0;line-height:1.6;font-size:15px;max-width:760px}.thhowlist li{margin-bottom:4px}.keyhelp .khclose{margin-top:6px}body.wall #thInfo{display:none}
+/* Freshness tags, feed health, shortcuts */
+.agetag{font:600 11px var(--f-mono);letter-spacing:.04em;padding:2px 7px;border-radius:3px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.agetag.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+.agetag.warn{color:#1c1503;background:var(--warn);border-color:var(--warn)}
+.agetag.crit{color:#fff;background:var(--crit);border-color:var(--crit)}
+.health{position:relative}
+.healthbtn{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--f-ui);padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.healthbtn i{width:9px;height:9px;border-radius:50%;background:var(--ok)}
+.healthbtn.warn i{background:var(--warn)} .healthbtn.crit i{background:var(--crit)} .healthbtn.idle i{background:var(--dim)}
+.healthpop{position:absolute;right:0;top:calc(100% + 6px);z-index:60;min-width:300px;background:var(--raised);border:1px solid var(--line2);border-radius:6px;padding:6px;box-shadow:0 8px 24px #0006}
+.healthpop button{display:flex;width:100%;justify-content:space-between;gap:12px;background:none;border:0;border-radius:4px;padding:6px 8px;color:var(--fg);cursor:pointer;text-align:left;font-size:13px}
+.healthpop button:hover{background:var(--line)}
+.healthpop .hp-none{padding:6px 8px;color:var(--muted);font-size:13px}
+.keyhelp{position:fixed;inset:0;z-index:90;background:#0009;display:grid;place-items:center;padding:16px}
+.keyhelp>div{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:18px 22px;max-width:640px;width:100%;max-height:90vh;overflow:auto}
+.keyhelp h3{margin:0 0 10px;font-size:16px;letter-spacing:.06em;text-transform:uppercase}
+.keyhelp dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0}
+.keyhelp dt{font:600 13px var(--f-mono);color:var(--accent);white-space:nowrap} .keyhelp dd{margin:0;font-size:14px}
+.keyhelp .cols{columns:2;column-gap:24px;font-size:14px;margin:10px 0 14px} .keyhelp .cols div{break-inside:avoid;padding:1px 0}
+.keyhelp .cols b{font-family:var(--f-mono);color:var(--accent);display:inline-block;min-width:2.2em}
+.jumpcue{position:fixed;z-index:95;left:50%;top:18%;transform:translateX(-50%);font:700 56px var(--f-mono);color:var(--fg);background:color-mix(in srgb,var(--bg) 85%,transparent);border:1px solid var(--line2);border-radius:10px;padding:8px 22px;pointer-events:none}
 /* Launch form */
 form.add{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));align-items:end}
 form.add label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
@@ -307,7 +351,8 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
   <div class="hrow">
     <div class="brand"><img class="logo-delta brandmark" alt="" src=""><h1>Metcon</h1><span class="sub">45 WS daily weather &amp; ops brief</span></div>
     <div class="clock"><span><b>Z</b><span id="clkZ">--:--</span></span><span><b>ET</b><span id="clkL">--:--</span></span></div>
-    <div class="hbtns">
+    <div class="health"><button class="healthbtn idle" type="button" id="healthBtn" aria-expanded="false"><i></i><span id="healthTxt">Checking feeds…</span></button><div class="healthpop" id="healthPop" hidden></div></div>
+    <div class="hbtns"><button class="btn" id="btnKeys" type="button" title="Keyboard shortcuts (?)">?</button>
       <button class="btn" id="btnTheme" type="button" aria-pressed="false" title="Switch light / dark">Light</button>
       <button class="btn" id="btnWall" type="button" aria-pressed="false" title="Wall mode: full-screen layout for the briefing screen">Wall</button>
       <button class="btn primary" id="refreshAll" type="button">Refresh all</button>
@@ -323,6 +368,7 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
   <span class="wbtab" id="wbTab"></span>
   <button type="button" class="btn sm" id="wbNext" aria-label="Next tab">&#9654;</button>
   <label class="wbcyc"><input type="checkbox" id="wbCycle"> Rotate <select id="wbSecs"><option value="30">30 s</option><option value="60" selected>60 s</option><option value="120">2 min</option></select></label>
+  <span class="healthbtn idle" id="wbHealth"><i></i><span></span></span>
   <span id="wbLinks" class="wblinks"></span>
   <button type="button" class="btn sm" id="wbTheme">Light</button>
   <button type="button" class="btn sm" id="wbExit">Exit wall mode</button>
@@ -360,6 +406,24 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
   <div class="sumrow" id="obsSummary"></div>
   <div class="stations" id="stations"></div>
   <p class="note">Precip is the sum of hourly METAR precip groups; stations without a precip sensor show "—". Lightning is auto-flagged from TS/LTG in the METARs. Set it from CGLSS or the lightning network with the selector, which overrides the auto flag for this briefing.</p>
+</div>
+
+<!-- Threat matrix -->
+<div class="view" id="v-threats" role="tabpanel" hidden>
+  <div class="vh"><h2>Threat Matrix</h2><span class="meta" id="thMeta"></span>
+    <div class="act"><button class="btn sm" type="button" id="thInfo" title="How the matrix is assigned">ⓘ How it's scored</button><button class="btn sm" type="button" id="thAutoBtn">Refresh from data</button><button class="btn sm" type="button" id="thCarry">Carry over from yesterday</button><button class="btn sm" type="button" id="thClear">Clear</button></div></div>
+  <div class="impconfirm" id="thConfirm" hidden><span id="thAsk"></span> <button class="btn sm" type="button" id="thYes"></button><button class="btn sm" type="button" id="thNo">Cancel</button></div>
+  <section class="panel thwrap"><div class="tablewrap"><table class="thtab" id="thTable"></table></div></section>
+  <div class="thkey"><span class="thlv l0">None</span><span class="thlv l1">Low</span><span class="thlv l2">Moderate</span><span class="thlv l3">High</span><span class="note">Filled from data as a first guess. Click a cell to raise it, Shift-click to lower it (✎ = yours; right-click to hand it back to the data).</span></div>
+  <template id="thHowTpl"><div><h3>How the matrix is assigned</h3><ul class="thhowlist">
+    <li><b>Lightning</b> — NWS probability of thunder at the Cape: 10% Low, 25% Moderate, 55% High. An SPC thunder area raises it to at least Low, Marginal or higher to at least Moderate.</li>
+    <li><b>Surface winds</b> — NWS forecast winds at the Cape: sustained 18 kt Low, sustained 25 kt Moderate, gusts 35 kt High.</li>
+    <li><b>Severe / hail</b> — SPC Day 1–3 category at the Cape: Marginal Low, Slight Moderate, Enhanced or higher High.</li>
+    <li><b>Heavy rain / flooding</b> — NWS rainfall total (QPF) for the day: 0.25″ Low, 1″ Moderate, 2″ High.</li>
+    <li><b>Temperature</b> — heat index 98° / 103° / 108°, or low temperature 45° / 38° / 32°.</li>
+    <li><b>Marine &amp; coastal</b> — seas and gusts ~12 nm offshore: 5 / 7 / 10 ft, or 20 / 25 / 34 kt.</li>
+    <li>Active NWS watches, warnings and advisories (severe, flood, wind, heat/freeze, small craft, gale, rip current…) raise the matching row on the days they cover.</li>
+    <li>Today only counts the hours left in the day. The data refreshes each time you open the slide if it is over 30 minutes old.</li></ul><p class="note">Cells marked ✎ were set by the forecaster and are never changed by the data. Click outside or press Esc to close.</p><button class="btn sm khclose" type="button">Close</button></div></template>
 </div>
 
 <!-- 3 Impacts -->
@@ -446,17 +510,12 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 
 <!-- 9 SPC Model Viewer -->
 <div class="view" id="v-ncep" role="tabpanel" hidden>
-  <div class="vh"><h2>SPC Model Viewer</h2><span class="meta" id="smMeta"></span>
-    <div class="act ctrl">
-      <div class="seg" id="smModel" role="group" aria-label="Ensemble"><button type="button" data-k="href">HREF</button><button type="button" data-k="refs">REFS</button></div>
-      <label>Sector <select id="smSector">
-        <option value="se">Southeast</option><option value="conus">CONUS</option><option value="ma">Mid Atlantic</option><option value="sp">Southern Plains</option></select></label>
-      <a class="btn sm" id="smOpen" target="_blank" rel="noopener" href="https://www.spc.noaa.gov/exper/href/">Open at SPC ↗</a></div></div>
-  <div class="smnote" id="smNote" hidden></div>
+  <div class="vh"><h2>SPC Model Viewer</h2><span class="meta" id="smMeta">REFS ensemble (RRFS-based) · pan and zoom the map, pick fields from the menus</span>
+    <div class="act"><a class="btn sm" id="smOpen" target="_blank" rel="noopener" href="https://www.spc.noaa.gov/exper/refs/viewer/">Open at SPC ↗</a></div></div>
   <section class="panel smblocked" id="smBlocked" hidden><div class="pb">
     <p><b>SPC's viewer only shows here when the dashboard is opened from its web address</b> (your GitHub Pages link). This copy is open as a local file or preview, and SPC blocks its viewer from appearing inside those.</p>
-    <a class="btn primary" id="smBlockedGo" target="_blank" rel="noopener" href="https://www.spc.noaa.gov/exper/href/">Open the SPC viewer in a new tab ↗</a></div></section>
-  <section class="panel smwrap"><iframe id="smFrame" title="SPC ensemble viewer" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></section>
+    <a class="btn primary" id="smBlockedGo" target="_blank" rel="noopener" href="https://www.spc.noaa.gov/exper/refs/viewer/">Open the SPC viewer in a new tab ↗</a></div></section>
+  <section class="panel smwrap"><iframe id="smFrame" title="SPC REFS ensemble viewer" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></section>
 </div>
 
 <!-- 7 Meteogram -->
@@ -572,21 +631,6 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
   </section>
 </div>
 
-<!-- 12 References -->
-<div class="view" id="v-refs" role="tabpanel" hidden>
-  <div class="vh"><h2>References</h2></div>
-  <section class="panel"><div class="ph"><h3>Quick references</h3></div>
-    <div class="pb quick">
-      <a href="https://www.weather.gov/mlb/" target="_blank" rel="noopener">NWS Melbourne<small>weather.gov/mlb</small></a>
-      <a href="https://radar.weather.gov/station/kmlb/standard" target="_blank" rel="noopener">KMLB radar<small>radar.weather.gov</small></a>
-      <a href="https://www.nhc.noaa.gov/" target="_blank" rel="noopener">National Hurricane Center<small>nhc.noaa.gov</small></a>
-      <a href="https://www.wpc.ncep.noaa.gov/" target="_blank" rel="noopener">WPC<small>wpc.ncep.noaa.gov</small></a>
-      <a href="https://aviationweather.gov/" target="_blank" rel="noopener">Aviation Weather Center<small>aviationweather.gov</small></a>
-      <a href="https://www.patrick.spaceforce.mil/About-Us/Weather/" target="_blank" rel="noopener">45 WS<small>patrick.spaceforce.mil</small></a>
-      <a href="https://www.polarwx.com/models/" target="_blank" rel="noopener">PolarWx Models<small>polarwx.com</small></a>
-      <a href="https://www.pivotalweather.com/model.php?m=gfs&amp;r=us_se" target="_blank" rel="noopener">Pivotal Weather<small>pivotalweather.com</small></a>
-    </div></section>
-</div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -597,7 +641,7 @@ const LOGO_DELTA="data:image/webp;base64,UklGRqIwAABXRUJQVlA4WAoAAAAQAAAA7wAAPwE
 document.querySelectorAll("img.logo-patch").forEach(i=>i.src=LOGO_PATCH);document.querySelectorAll("img.logo-delta").forEach(i=>i.src=LOGO_DELTA);
 
 "use strict";
-const NAV=[["launch","Launch Schedule"],["obs","Past 24 h"],["impacts","Impacts"],["analysis","Model Analysis"],["skewt","Skew-T"],["guidance","Prog Charts"],["models","Windy"],["ncep","SPC Model Viewer"],["meteogram","Meteogram"],["spc","SPC/WPC"],["tropics","Tropics"],["sat","Satellite"],["radar","Radar"],["planning","Planning Forecast","https://45thweathersquadron.nebula.spaceforce.mil/pages/planningAndAviationForecastProducts.html"],["room","Around the Room"],["refs","References"]];
+const NAV=[["launch","Launch Schedule"],["obs","Past 24 h"],["impacts","Impacts"],["threats","Threat Matrix"],["analysis","Model Analysis"],["skewt","Skew-T"],["guidance","Prog Charts"],["models","Windy"],["ncep","SPC Model Viewer"],["meteogram","Meteogram"],["spc","SPC/WPC"],["tropics","Tropics"],["sat","Satellite"],["radar","Radar"],["planning","Planning Forecast","https://45thweathersquadron.nebula.spaceforce.mil/pages/planningAndAviationForecastProducts.html"],["room","Around the Room"]];
 const TABS=NAV.filter(t=>!t[2]);
 const CAPE={lat:28.4884,lon:-80.5778};
 const STATIONS=[{id:"KTTS",name:"KSC",full:"Shuttle Landing Facility"},{id:"KXMR",name:"Cape",full:"Cape Canaveral SFS"},{id:"KCOF",name:"Patrick SFB",full:"Patrick SFB"}];
@@ -629,12 +673,58 @@ function show(id,push){
   TABS.forEach(([t])=>{$("#v-"+t).hidden=t!==id;$("#t-"+t).setAttribute("aria-selected",t===id)});
   $("#t-"+id).scrollIntoView({block:"nearest",inline:"nearest"});
   if(push){try{history.replaceState(null,"","#"+id)}catch{} store.set("tab",id)}
+  if(loaders[id]&&FRESH_CFG[id]&&loaded[id]&&["warn","crit"].includes(freshState(id)))loaded[id]=false;
+  if(id==="threats")thLoad();
   if(!loaded[id]&&loaders[id]){loaded[id]=true;loaders[id]()}
   else if(id==="meteogram"){drawMeteogram();window.__metconXs?.draw()}
   if(id==="radar")setTimeout(()=>rd.map?.invalidateSize(),60);
   if(id==="skewt")setTimeout(()=>window.__metconRenderSkew?.(),30);
 }
 nav.addEventListener("keydown",e=>{if(!/Arrow(Left|Right)/.test(e.key))return;const ids=TABS.map(t=>t[0]);const cur=ids.findIndex(t=>$("#t-"+t).getAttribute("aria-selected")==="true");const n=ids[(cur+(e.key==="ArrowRight"?1:-1)+ids.length)%ids.length];show(n,true);$("#t-"+n).focus()});
+
+/* ---------- data freshness: a tag on each data slide + a feed-health light in the header ---------- */
+// w/c = minutes until a slide's data is flagged amber / red. "kind:load" slides show when the images were last pulled.
+const FRESH_CFG={launch:{w:60,c:240},obs:{w:90,c:180},analysis:{w:90,c:180,load:1},skewt:{w:14*60,c:26*60},guidance:{w:6*60,c:12*60,load:1},meteogram:{w:6*60,c:12*60},spc:{w:9*60,c:15*60},tropics:{w:7*60,c:13*60},sat:{w:30,c:90,load:1},radar:{w:15,c:30}};
+const FRESH={};
+for(const id in FRESH_CFG){const h=document.querySelector(`#v-${id} .vh h2`);if(h)h.insertAdjacentHTML("afterend",`<span class="agetag" id="age-${id}" hidden></span>`)}
+const agoTxt=ms=>{const m=Math.max(0,Math.round(ms/60000));return m<60?`${m} min`:m<48*60?`${Math.floor(m/60)} h ${pad(m%60)} m`:`${Math.round(m/1440)} d`};
+function freshState(id){const f=FRESH[id],c=FRESH_CFG[id];if(!f)return null;if(f.err)return "crit";const age=(Date.now()-f.t)/60000;return age>=c.c?"crit":age>=c.w?"warn":"ok"}
+function fresh(id,o){FRESH[id]={...o,at:Date.now()};renderFresh()}
+function renderFresh(){
+  for(const id in FRESH_CFG){const el=$("#age-"+id),f=FRESH[id];if(!el)continue;if(!f){el.hidden=true;continue}const st=freshState(id);el.hidden=false;el.className="agetag "+st;
+    el.textContent=f.err?`NO DATA`:`${f.label?f.label+" ":""}${fmtZ(new Date(f.t))} · ${agoTxt(Date.now()-f.t)}${f.note?" · "+f.note:""}`;el.title=f.err||""}
+  const ids=Object.keys(FRESH),bad=ids.filter(i=>freshState(i)!=="ok"),down=ids.filter(i=>freshState(i)==="crit");
+  const cls=!ids.length?"idle":down.length?"crit":bad.length?"warn":"",txt=!ids.length?"Checking feeds…":!bad.length?"All feeds current":down.length?`${down.length} feed${down.length>1?"s":""} down or stale`:`${bad.length} feed${bad.length>1?"s":""} getting old`;
+  for(const b of [$("#healthBtn"),$("#wbHealth")]){if(!b)continue;b.className="healthbtn "+cls;b.querySelector("span").textContent=txt}
+  if(!$("#healthPop").hidden)healthList()}
+function healthList(){const rows=NAV.filter(([id])=>FRESH_CFG[id]).map(([id,l])=>{const f=FRESH[id],st=freshState(id);
+    return `<button type="button" data-go="${id}"><span>${esc(l)}</span><span class="agetag ${st||""}">${!f?"not loaded":f.err?"NO DATA":agoTxt(Date.now()-f.t)}</span></button>`}).join("");
+  $("#healthPop").innerHTML=rows||'<div class="hp-none">No feeds loaded yet.</div>'}
+$("#healthBtn").onclick=e=>{e.stopPropagation();const p=$("#healthPop");p.hidden=!p.hidden;$("#healthBtn").setAttribute("aria-expanded",String(!p.hidden));if(!p.hidden)healthList()};
+$("#healthPop").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(!b)return;$("#healthPop").hidden=true;show(b.dataset.go,true)});
+document.addEventListener("click",e=>{if(!e.target.closest(".health"))$("#healthPop").hidden=true});
+setInterval(renderFresh,30000);
+
+/* ---------- keyboard: number keys jump to a slide, ? shows shortcuts, W toggles wall mode ---------- */
+let jumpBuf="",jumpT=null;
+function jumpTo(n){const t=NAV[n-1];if(!t)return;if(t[2]){window.open(t[2],"_blank","noopener");return}show(t[0],true);renderWallBar();window.scrollTo(0,0)}
+function cue(txt){let c=$("#jumpCue");if(!c){c=document.createElement("div");c.id="jumpCue";c.className="jumpcue";document.body.appendChild(c)}c.textContent=txt;c.hidden=!txt}
+function keyHelp(open){let h=$("#keyHelp");if(open===false||(open==null&&h)){h?.remove();return}if(h)return;
+  h=document.createElement("div");h.id="keyHelp";h.className="keyhelp";h.setAttribute("role","dialog");h.setAttribute("aria-label","Keyboard shortcuts");
+  h.innerHTML=`<div><h3>Keyboard shortcuts</h3><div class="cols">${NAV.map(([id,l,href],i)=>`<div><b>${i+1}</b>${esc(l)}${href?" ↗":""}</div>`).join("")}</div>
+    <dl><dt>1 – ${NAV.length}</dt><dd>Jump to that slide (type two digits quickly for 10 and up)</dd><dt>W</dt><dd>Wall mode on / off</dd>
+    <dt>PgDn · Space / PgUp</dt><dd>Next / previous slide (wall mode)</dd><dt>← →</dt><dd>Step forecast hours on Prog Charts, Meteogram and other loops</dd>
+    <dt>Esc</dt><dd>Close this, or leave wall mode</dd><dt>?</dt><dd>Show or hide this list</dd></dl></div>`;
+  h.addEventListener("click",e=>{if(e.target===h)h.remove()});document.body.appendChild(h)}
+$("#btnKeys").onclick=()=>keyHelp();
+document.addEventListener("keydown",e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;const tg=e.target;if(/INPUT|SELECT|TEXTAREA/.test(tg.tagName)||tg.isContentEditable)return;
+  if(e.key==="Escape"&&$("#keyHelp")){keyHelp(false);e.stopImmediatePropagation();return}
+  if(e.key==="?"){keyHelp();e.preventDefault();return}
+  if(e.key==="w"||e.key==="W"){$("#btnWall").click();return}
+  if(/^[0-9]$/.test(e.key)){jumpBuf+=e.key;clearTimeout(jumpT);const n=+jumpBuf;cue(jumpBuf);
+    const done=()=>{cue("");const k=+jumpBuf;jumpBuf="";if(k>=1&&k<=NAV.length)jumpTo(k)};
+    if(jumpBuf.length>=2||n*10>NAV.length)jumpT=setTimeout(done,150);else jumpT=setTimeout(done,700)}});
 
 /* ---------- image helper ---------- */
 function imgCell(title,src,href){
@@ -655,15 +745,15 @@ let llData=[];
 async function loadLaunches(force){
   $("#llMeta").textContent="loading…";
   const cache=store.get("ll",null);
-  if(!force&&cache&&Date.now()-cache.t<30*60e3){llData=cache.d;renderLaunches(`cached ${fmtZ(new Date(cache.t))}`);return}
+  if(!force&&cache&&Date.now()-cache.t<30*60e3){llData=cache.d;renderLaunches(`cached ${fmtZ(new Date(cache.t))}`);fresh("launch",{t:cache.t,label:"updated"});return}
   let err;
   for(const u of LL_URLS){try{const j=await getJSON(u,{accept:"application/json"});llData=(j.results||[]).map(r=>({
       net:r.net,ws:r.window_start,we:r.window_end,veh:r.rocket?.configuration?.name||r.rocket?.configuration?.full_name||"",
       mis:r.mission?.name||r.name,orbit:r.mission?.orbit?.abbrev||"",pad:r.pad?.name||"",prov:r.launch_service_provider?.name||"",
       st:r.status?.abbrev||"",stn:r.status?.name||""}));
-      store.set("ll",{t:Date.now(),d:llData});renderLaunches(stamp());return}catch(e){err=e}}
-  if(cache){llData=cache.d;renderLaunches(`feed unavailable (${err.message}); showing cache from ${fmtZ(new Date(cache.t))}`)}
-  else{llData=[];renderLaunches(`feed unavailable: ${err.message}`)}
+      store.set("ll",{t:Date.now(),d:llData});renderLaunches(stamp());fresh("launch",{t:Date.now(),label:"updated"});return}catch(e){err=e}}
+  if(cache){llData=cache.d;renderLaunches(`feed unavailable (${err.message}); showing cache from ${fmtZ(new Date(cache.t))}`);fresh("launch",{t:cache.t,label:"cached",note:"feed down"})}
+  else{llData=[];renderLaunches(`feed unavailable: ${err.message}`);fresh("launch",{err:err.message})}
 }
 function statusPill(st,stn){const s=(st||"").toUpperCase();const cls=s==="GO"?"ok":s==="HOLD"||s==="FAILURE"?"crit":s==="TBC"?"warn":s==="IN FLIGHT"||s==="SUCCESS"?"info":"";return `<span class="pill ${cls}" title="${esc(stn)}">${esc(st||"—")}</span>`}
 function renderLaunches(meta){
@@ -703,11 +793,12 @@ async function loadObs(){
     renderStation(s)}));
   renderObsSummary();
   $("#obsMeta").textContent=`${fmtZ(start)} – ${fmtZ(end)} · ${stamp()}`;
+  const lasts=STATIONS.map(s=>obsResults[s.id]?.last).filter(Boolean);fresh("obs",lasts.length?{t:Math.max(...lasts),label:"latest ob"}:{err:"no observations loaded"});
 }
 function summarize(obs){
   const r={n:obs.length,maxT:null,minT:null,maxW:null,maxG:null,precip:null,ltg:false,ltgObs:[],tmax:null,tmin:null,tw:null};
-  const hourly={};
-  for(const o of obs){const t=new Date(o.timestamp);const T=c2f(o.temperature?.value);
+  const hourly={};r.last=0;
+  for(const o of obs){const t=new Date(o.timestamp);if(+t>r.last)r.last=+t;const T=c2f(o.temperature?.value);
     if(T!=null){if(r.maxT==null||T>r.maxT){r.maxT=T;r.tmax=t}if(r.minT==null||T<r.minT){r.minT=T;r.tmin=t}}
     const W=kmh2kt(o.windSpeed?.value),G=kmh2kt(o.windGust?.value);
     if(W!=null&&(r.maxW==null||W>r.maxW)){r.maxW=W;r.tw=t;r.wd=o.windDirection?.value}
@@ -770,8 +861,13 @@ function afdFirstGuess(txt){
   let winds=afdPick(avn.filter(s=>/\bk(no)?ts?\b|knots/i.test(s)),windRe,2);if(winds.length<2)winds=winds.concat(afdPick(disc,windRe,2-winds.length));
   let showers=afdPick(disc.filter(notLt),shRe,3);if(!showers.length)showers=afdPick(key,shRe,2);
   let lt=afdPick(disc,ltRe,1);if(!lt.length)lt=afdPick(avn.concat(mar),ltRe,1);
-  const fmt=a=>a.length?a.join(" "):"Not mentioned in the NWS discussion.";
-  return `WINDS: ${fmt(winds)}\n\nSHOWERS: ${fmt(showers)}\n\nLIGHTNING: ${lt.length?lt.join(" "):"Not mentioned in the NWS discussion."}`;
+  const short=t=>{t=t.replace(/^(?:However|Overall|Otherwise|Additionally|Meanwhile|Again|Generally|That said|As such|Then|At this time|For now|Currently),?\s+/i,"").replace(/\s*\((?![^)]*%)[^)]*\)/g,"")
+      .replace(/\bknots\b/gi,"kt").replace(/\bpercent\b/gi,"%").replace(/\s+%/g,"%").replace(/\bmiles per hour\b/gi,"mph").replace(/…$/,"").replace(/[.;:,]\s*$/,"");
+    if(t.length>115){const cuts=[...t.slice(0,118).matchAll(/;|, (?:with|and|but|as|mainly|while|which|especially|although)\b| as the\b/g)].map(m=>m.index).filter(x=>x>=40);
+      t=cuts.length?t.slice(0,cuts.at(-1)):t.slice(0,110).replace(/\s+\S*$/,"")+"…"}
+    return t.charAt(0).toUpperCase()+t.slice(1)};
+  const sec=(h,a,n)=>`${h}\n${a.length?[...new Set(a.slice(0,n).map(short))].map(x=>"• "+x).join("\n"):"• Nothing notable in the NWS discussion"}`;
+  return [sec("WINDS",winds,2),sec("SHOWERS",showers,2),sec("LIGHTNING",lt,1)].join("\n\n");
 }
 
 const etDay=t=>new Date(t).toLocaleDateString("en-CA",{timeZone:"America/New_York"});
@@ -782,11 +878,11 @@ function impMetaUpd(n){const m=$("#impMeta");
 async function impDraft(){
   $("#impMeta").textContent="building first guess from the latest NWS Melbourne discussion…";
   try{const l=await getJSON("https://api.weather.gov/products/types/AFD/locations/MLB");const p=await getJSON(`https://api.weather.gov/products/${l["@graph"][0].id}`);
-    const n={text:afdFirstGuess(p.productText||""),t:Date.now(),afd:Date.parse(p.issuanceTime),edited:false};
+    const n={text:afdFirstGuess(p.productText||""),t:Date.now(),afd:Date.parse(p.issuanceTime),edited:false,v:2};
     impBox.value=n.text;store.set("impacts",n);impMetaUpd(n)}
   catch(e){$("#impMeta").textContent=`Couldn't reach the NWS discussion (${e.message}). Type notes directly.`}}
 function impLoad(){const n=store.get("impacts",null);
-  if(n&&etDay(n.t)===etDay(Date.now())&&(n.edited||n.afd)){impBox.value=n.text;impMetaUpd(n);return}
+  if(n&&etDay(n.t)===etDay(Date.now())&&(n.edited||(n.afd&&n.v===2))){impBox.value=n.text;impMetaUpd(n);return}
   if(n&&n.edited&&etDay(n.t)!==etDay(Date.now())){/* yesterday's notes: replace with a fresh first guess */}
   impDraft()}
 let impT;impBox.addEventListener("input",()=>{clearTimeout(impT);impT=setTimeout(()=>{const n={text:impBox.value,t:Date.now(),edited:true};store.set("impacts",n);impMetaUpd(n)},400)});
@@ -799,7 +895,7 @@ impLoad();
 
 /* ---------- 4 analysis quad ---------- */
 const QUAD=[["pmsl","Surface — MSLP & wind"],["850mb","850 mb"],["700mb","700 mb"],["500mb","500 mb"]];
-function loadQuad(){
+function loadQuad(){fresh("analysis",{t:Date.now(),label:"loaded"});
   const s=$("#mesoSector").value;store.set("sector",s);
   const q=$("#quad");q.innerHTML="";
   QUAD.forEach(([p,t])=>q.appendChild(imgCell(t,`https://www.spc.noaa.gov/exper/mesoanalysis/s${s}/${p}/${p}.gif`,`https://www.spc.noaa.gov/exper/mesoanalysis/new/viewsector.php?sector=${s}`)));
@@ -854,7 +950,7 @@ async function pollSnd(){clearTimeout(snd.timer);$("#sndMeta").textContent=snd.p
     snd.valid=Date.parse(got.valid);snd.at=Date.now();snd.err="";snd.src=src}
   catch(e){snd.err=e.message||String(e)}
   const im=$("#smgImg");if(im){im.onerror=()=>{im.hidden=true;$("#smgMeta").textContent="Image not available right now"};im.onload=()=>{im.hidden=false;$("#smgMeta").textContent="image from weather.gov/smg"};im.src="https://www.weather.gov/images/smg/KSCSNDG.GIF?t="+Math.floor(Date.now()/600000)}
-  renderSnd();snd.timer=setTimeout(pollSnd,20*60000)}
+  renderSnd();fresh("skewt",snd.valid?{t:snd.valid,label:"sounding",note:snd.err?"refresh failed":""}:{err:snd.err||"no sounding"});snd.timer=setTimeout(pollSnd,20*60000)}
 // thermodynamics
 const C2K=t=>t+273.15,esat=tc=>6.112*Math.exp(17.67*tc/(tc+243.5)),mixr=(tc,p)=>{const e=esat(tc);return 0.622*e/(p-e)};
 function moistStep(tk,p,dp){const Rd=287.04,cp=1005.7,L=2.501e6,eps=0.622;
@@ -990,7 +1086,7 @@ function pgDrawSE(box,h){
     im.addEventListener("load",()=>draw(im),{once:true});im.addEventListener("error",()=>{if(PROGS[pgIdx]===h)box.innerHTML='<div class="fail">Image not available yet<a href="https://aviationweather.gov/gfa/#progchart" target="_blank" rel="noopener">Open the product page</a></div>'},{once:true})}}
 $("#pgArea").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;pgArea=b.dataset.k;store.set("pgArea",pgArea);showProg(pgIdx)});
 function preloadProgs(){const m=Math.floor(Date.now()/60000);PROGS.forEach(h=>{const im=new Image();im.alt="";im.src=progSrc(h)+"?_="+m;pgCache[h]=im})}
-function loadProgs(){preloadProgs();showProg(pgIdx);$("#pgMeta").textContent="WPC surface progs via AWC · "+stamp()}
+function loadProgs(){preloadProgs();showProg(pgIdx);fresh("guidance",{t:Date.now(),label:"loaded"});$("#pgMeta").textContent="WPC surface progs via AWC · "+stamp()}
 function stopLoop(){clearInterval(pgTimer);pgTimer=null;$("#pgPlay").textContent="Loop"}
 $("#pgHours").addEventListener("click",e=>{const b=e.target.closest("button");if(b){stopLoop();showProg(+b.dataset.i)}});
 $("#pgPrev").onclick=()=>{stopLoop();showProg(pgIdx-1)};$("#pgNext").onclick=()=>{stopLoop();showProg(pgIdx+1)};
@@ -1037,28 +1133,92 @@ $("#mdView").onchange=()=>{wd.view=$("#mdView").value;windyRender()};
 $("#mdDetail").onchange=()=>{wd.detail=$("#mdDetail").checked;windyRender()};
 loaders.models=windyRender;
 
-/* ---------- 9 SPC Model Viewer (SPC HREF / REFS ensemble viewers, embedded) ---------- */
-// NWS ends HREF on or about 3 Nov 2026 (SCN 26-48); SPC's REFS viewer replaces it. After that date the tab defaults to REFS.
-const HREF_END=Date.parse("2026-11-04T00:00:00Z");
-const hrefLive=()=>Date.now()<HREF_END;
-let sm={model:store.get("sm.model",hrefLive()?"href":"refs"),sector:store.get("sm.sector","se")};
-if(!hrefLive())sm.model="refs";
-const smUrl=()=>sm.model==="href"?`https://www.spc.noaa.gov/exper/href/?model=href&product=cref_members&sector=${sm.sector}`:"https://www.spc.noaa.gov/exper/refs/viewer/";
+/* ---------- Threat matrix: Today / Tomorrow / Day 3. A first guess is filled from NWS grid forecasts, SPC outlooks and
+   active NWS alerts; any cell the forecaster clicks is theirs (marked ✎) and is never overwritten by a data refresh. ---------- */
+const TH_ROWS=[["ltg","Lightning"],["wind","Surface winds"],["svr","Severe / hail"],["rain","Heavy rain / flooding"],["temp","Temperature"],["marine","Marine & coastal"]];
+const TH_LV=["None","Low","Moderate","High"],DAYMS=864e5,TH_OFF={lat:28.45,lon:-80.35}; // TH_OFF: a sea point ~12 nm off the Cape for seas
+let thDay="",th=null,thPending=null,thBusy=false;
+const thKey=d=>"thr."+d,tri=v=>[v,v,v];
+const thBlank=()=>({c:Object.fromEntries(TH_ROWS.map(([k])=>[k,[0,0,0]])),m:Object.fromEntries(TH_ROWS.map(([k])=>[k,[0,0,0]])),r:{},n:{},t:0,auto:0});
+function thFix(o){const b=thBlank();o={...b,...o};for(const [k] of TH_ROWS){o.c[k]||(o.c[k]=[0,0,0]);o.m[k]||(o.m[k]=[0,0,0]);o.r[k]||(o.r[k]=["","",""])}return o}
+function thLoad(){const d=etDay(Date.now());if(d!==thDay||!th){thDay=d;th=thFix(store.get(thKey(thDay),null)||{})}thRender();
+  if(!th.auto||Date.now()-th.auto>30*60000)thAuto()}
+function thSave(){th.t=Date.now();store.set(thKey(thDay),th);thMeta()}
+function thMeta(){const ed=TH_ROWS.reduce((n,[k])=>n+th.m[k].filter(Boolean).length,0);
+  $("#thMeta").textContent=thBusy?"pulling NWS grid, SPC outlooks and alerts…":th.auto?`first guess from data ${fmtZ(new Date(th.auto))}${ed?` · ${ed} cell${ed>1?"s":""} set by forecaster ✎`:""}`:th.t?`saved ${fmtL(new Date(th.t))} ET`:"not set yet today"}
+function thRender(){const days=[0,1,2].map(i=>new Date(Date.now()+i*DAYMS)),lbl=["Today","Tomorrow","Day 3"];
+  const hd=days.map((d,i)=>`<th>${lbl[i]}<small>${d.toLocaleDateString("en-US",{timeZone:"America/New_York",weekday:"short",month:"short",day:"numeric"})}</small></th>`).join("");
+  $("#thTable").innerHTML=`<thead><tr><th>Threat</th>${hd}<th>Notes</th></tr></thead><tbody>${TH_ROWS.map(([k,l])=>`<tr><th scope="row">${esc(l)}</th>${
+    th.c[k].map((v,i)=>`<td><button type="button" class="thcell l${v}${th.m[k][i]?" man":""}" data-k="${k}" data-i="${i}" title="${th.m[k][i]?"Set by forecaster. Right-click to hand it back to the data.":"First guess from data. Click to override."}"><span>${TH_LV[v]}</span>${th.r[k][i]?`<small>${esc(th.r[k][i])}</small>`:""}</button></td>`).join("")
+    }<td><input class="thnote" data-k="${k}" maxlength="120" value="${esc(th.n[k]||"")}"></td></tr>`).join("")}</tbody>`;thMeta()}
+$("#thTable").addEventListener("click",e=>{const b=e.target.closest(".thcell");if(!b)return;const k=b.dataset.k,i=+b.dataset.i;
+  th.c[k][i]=(th.c[k][i]+(e.shiftKey?3:1))%4;th.m[k][i]=1;thSave();thRender();$(`.thcell[data-k="${k}"][data-i="${i}"]`)?.focus()});
+$("#thTable").addEventListener("contextmenu",e=>{const b=e.target.closest(".thcell.man");if(!b)return;e.preventDefault();th.m[b.dataset.k][+b.dataset.i]=0;thSave();thAuto()});
+$("#thTable").addEventListener("input",e=>{const n=e.target.closest(".thnote");if(!n)return;th.n[n.dataset.k]=n.value;thSave()});
+function thAsk(q,yes,fn){$("#thAsk").textContent=q;$("#thYes").textContent=yes;thPending=fn;$("#thConfirm").hidden=false}
+$("#thNo").onclick=()=>{$("#thConfirm").hidden=true;thPending=null};
+$("#thYes").onclick=()=>{$("#thConfirm").hidden=true;thPending?.();thPending=null};
+$("#thClear").onclick=()=>thAsk("Clear your edits and notes and start over from the data?","Clear",()=>{th=thBlank();thSave();thRender();thAuto()});
+$("#thAutoBtn").onclick=()=>thAuto();
+function thHow(){keyHelp(false);const h=document.createElement("div");h.id="keyHelp";h.className="keyhelp";h.setAttribute("role","dialog");h.setAttribute("aria-label","How the threat matrix is assigned");
+  h.appendChild($("#thHowTpl").content.cloneNode(true));h.addEventListener("click",e=>{if(e.target===h||e.target.closest(".khclose"))h.remove()});document.body.appendChild(h);h.querySelector(".khclose").focus()}
+$("#thInfo").onclick=thHow;
+$("#thCarry").onclick=()=>{const prev=store.get(thKey(etDay(Date.now()-DAYMS)),null);
+  if(!prev){thAsk("No matrix was saved yesterday in this browser.","OK",null);$("#thNo").hidden=true;$("#thYes").addEventListener("click",()=>$("#thNo").hidden=false,{once:true});return}
+  const p0=thFix(prev),go=()=>{for(const [k] of TH_ROWS){for(const i of [0,1])if(p0.m[k][i+1]){th.c[k][i]=p0.c[k][i+1];th.m[k][i]=1}}th.n={...p0.n};thSave();thRender()};
+  thAsk("Bring over yesterday's hand-set Tomorrow and Day 3 cells as today's Today and Tomorrow, plus the notes?","Carry over",go)};
+
+/* scoring: each returns [level, reason] for one ET day from the hourly samples */
+function thSeries(prop,conv=v=>v){const out=[];for(const {validTime,value} of prop?.values||[]){if(value==null)continue;const [s0,dur]=validTime.split("/");const t0=Date.parse(s0);
+  const m=dur.match(/P(?:(\d+)D)?T?(?:(\d+)H)?/),hrs=(+(m[1]||0))*24+(+(m[2]||0))||1;for(let h=0;h<hrs;h++)out.push([t0+h*3600e3,conv(value),hrs])}return out}
+const thMax=(a,d)=>{const v=a.filter(([t])=>etDay(t)===d&&t>=Date.now()-3600e3).map(x=>x[1]);return v.length?Math.max(...v):null};
+const thMin=(a,d)=>{const v=a.filter(([t])=>etDay(t)===d&&t>=Date.now()-3600e3).map(x=>x[1]);return v.length?Math.min(...v):null};
+const thSum=(a,d)=>{const v=a.filter(([t])=>etDay(t)===d&&t>=Date.now()-3600e3);return v.length?v.reduce((s,x)=>s+x[1]/x[2],0):null};
+const lvAt=(v,cuts)=>v==null?0:cuts.filter(c=>v>=c).length; // cuts = [low, moderate, high]
+const SPC_LV={TSTM:0,MRGL:1,SLGT:2,ENH:3,MDT:3,HIGH:3};
+const ALERT_RULES=[[/coastal flood|rip current|high surf|small craft/i,"marine",2],[/tornado warning|severe thunderstorm warning/i,"svr",3],[/tornado watch|severe thunderstorm watch/i,"svr",2],
+  [/flash flood warning|flood warning/i,"rain",3],[/flood watch|flash flood watch/i,"rain",2],[/flood advisory/i,"rain",2],
+  [/high wind warning|hurricane|tropical storm warning|extreme wind/i,"wind",3],[/wind advisory|tropical storm watch|hurricane watch/i,"wind",2],
+  [/excessive heat|extreme heat|hard freeze|freeze warning|extreme cold/i,"temp",3],[/heat advisory|freeze watch|frost|cold weather advisory|wind chill/i,"temp",2],
+  [/gale|storm warning|hurricane force|hazardous seas|special marine warning/i,"marine",3]];
+async function thAuto(){if(thBusy)return;thBusy=true;thMeta();$("#thAutoBtn").disabled=true;
+  const days=[0,1,2].map(i=>etDay(Date.now()+i*DAYMS)),got={},why=[];
+  const kt=u=>u?.includes("km_h")?v=>v*0.539957:v=>v,f=v=>v*9/5+32;
+  const grid=async(lat,lon)=>{const pt=await getJSON(`https://api.weather.gov/points/${lat},${lon}`);return (await getJSON(pt.properties.forecastGridData)).properties};
+  const [g,o,spc,al]=await Promise.allSettled([grid(CAPE.lat,CAPE.lon),grid(TH_OFF.lat,TH_OFF.lon),Promise.all([1,2,3].map(d=>spcCapeRisk(d).then(r=>r.best?.LABEL||"none").catch(()=>null))),
+    Promise.all([CAPE,TH_OFF].map(p=>getJSON(`https://api.weather.gov/alerts/active?point=${p.lat},${p.lon}`).then(j=>j.features).catch(()=>[])))]);
+  const add=(k,i,lv,r)=>{got[k]??=[[0,""],[0,""],[0,""]];const c=got[k][i];if(r)c[1]=c[1]?c[1]+" · "+r:r;c[0]=Math.max(c[0],lv)};
+  if(g.status==="fulfilled"){const p=g.value,tw=kt(p.windGust?.uom);
+    const thun=thSeries(p.probabilityOfThunder),gust=thSeries(p.windGust,tw),sus=thSeries(p.windSpeed,kt(p.windSpeed?.uom)),qpf=thSeries(p.quantitativePrecipitation,v=>v/25.4),
+      tmp=thSeries(p.temperature,f),hi=thSeries(p.heatIndex,f),pop=thSeries(p.probabilityOfPrecipitation);
+    days.forEach((d,i)=>{const T=thMax(thun,d),P=thMax(pop,d),G=thMax(gust,d),S=thMax(sus,d),Q=thSum(qpf,d),X=thMax(tmp,d),N=thMin(tmp,d),H=thMax(hi,d);
+      add("ltg",i,lvAt(T,[10,25,55]),T==null?"no thunder data":`thunder ${Math.round(T)}%`);
+      add("wind",i,Math.max(lvAt(S,[18,25,Infinity]),G!=null&&G>=35?3:0),S==null&&G==null?"no wind data":`sustained ${S==null?"—":Math.round(S)} kt · gusts ${G==null?"—":Math.round(G)} kt`);
+      add("rain",i,lvAt(Q,[.25,1,2]),Q==null?"no QPF":`QPF ${Q.toFixed(2)}″${P!=null?` · PoP ${Math.round(P)}%`:""}`);
+      const ht=lvAt(H,[98,103,108]),cd=lvAt(N==null?null:-N,[-45,-38,-32]);
+      add("temp",i,Math.max(ht,cd),X==null?"no temps":`${Math.round(X)}° / ${Math.round(N)}°${H!=null&&H>X+1?` · HI ${Math.round(H)}°`:""}`)})}
+  else why.push("NWS grid");
+  if(o.status==="fulfilled"){const p=o.value,w=thSeries(p.waveHeight,v=>v*3.28084),og=thSeries(p.windGust,kt(p.windGust?.uom));
+    days.forEach((d,i)=>{const W=thMax(w,d),G=thMax(og,d),lv=Math.max(lvAt(W,[5,7,10]),lvAt(G,[20,25,34]));
+      add("marine",i,lv,W==null&&G==null?"no marine data":`seas ${W==null?"—":Math.round(W)} ft · gusts ${G==null?"—":Math.round(G)} kt`)})}
+  else why.push("offshore grid");
+  if(spc.status==="fulfilled")spc.value.forEach((c,i)=>{if(c==null){why.push(`SPC Day ${i+1}`);return}
+    const lv=SPC_LV[c]??0;add("svr",i,lv,c==="none"?"SPC no thunder":`SPC ${c}`);if(c!=="none")add("ltg",i,c==="TSTM"?1:2,c==="TSTM"?"SPC thunder area":`SPC ${c}`)});
+  const seen=new Set();for(const a of al.status==="fulfilled"?al.value.flat():[]){const pr=a.properties;if(seen.has(pr.id))continue;seen.add(pr.id);
+    const r=ALERT_RULES.find(([re])=>re.test(pr.event));if(!r)continue;const s0=Date.parse(pr.onset||pr.effective),e0=Date.parse(pr.ends||pr.expires);
+    days.forEach((d,i)=>{if(etDay(s0)<=d&&etDay(e0)>=d)add(r[1],i,r[2],pr.event)})}
+  for(const [k] of TH_ROWS)for(const i of [0,1,2]){const v=got[k]?.[i];if(!v)continue;th.r[k][i]=v[1];if(!th.m[k][i])th.c[k][i]=v[0]}
+  thBusy=false;$("#thAutoBtn").disabled=false;if(Object.keys(got).length){th.auto=Date.now();thSave()}thRender();
+  if(why.length)$("#thMeta").textContent+=` · couldn't reach: ${why.join(", ")}`}
+loaders.threats=thLoad;
+
+/* ---------- SPC Model Viewer: SPC's REFS ensemble viewer, embedded (HREF ended 3 Nov 2026) ---------- */
+const SM_URL="https://www.spc.noaa.gov/exper/refs/viewer/";
 function smRender(){
-  const hb=[...$("#smModel").children].find(b=>b.dataset.k==="href");hb.disabled=!hrefLive();hb.title=hrefLive()?"HREF ends on or about 3 Nov 2026":"HREF has been retired by NWS";
-  [...$("#smModel").children].forEach(b=>b.classList.toggle("on",b.dataset.k===sm.model));
-  $("#smSector").value=sm.sector;$("#smSector").disabled=sm.model==="refs";$("#smSector").title=sm.model==="refs"?"Pan and zoom the REFS map directly":"";
-  const u=smUrl();$("#smOpen").href=u;
-  // SPC only lets its viewers be framed by pages served over http(s); a dashboard opened as a local file (or inside a preview) is blocked
+  // SPC only lets its viewer be framed by pages served over http(s); a dashboard opened as a local file (or inside a preview) is blocked
   const framed=/^https?:$/.test(location.protocol);
-  $("#smBlocked").hidden=framed;$("#smFrame").hidden=!framed;$("#smBlockedGo").href=u;
-  if(framed&&$("#smFrame").src!==u)$("#smFrame").src=u;
-  $("#smMeta").textContent=sm.model==="href"?"HREF ensemble · composite reflectivity, members":"REFS ensemble (RRFS-based) · pan and zoom the map, pick fields from the menus";
-  const n=$("#smNote");n.hidden=!(sm.model==="href");
-  n.textContent="NWS ends HREF on or about 3 Nov 2026. SPC's REFS viewer replaces it; this tab switches to REFS automatically after that date.";
-  store.set("sm.model",sm.model);store.set("sm.sector",sm.sector)}
-$("#smModel").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||b.disabled)return;sm.model=b.dataset.k;smRender()});
-$("#smSector").onchange=()=>{sm.sector=$("#smSector").value;smRender()};
+  $("#smBlocked").hidden=framed;$("#smFrame").hidden=!framed;$("#smBlockedGo").href=SM_URL;
+  if(framed&&$("#smFrame").src!==SM_URL)$("#smFrame").src=SM_URL}
 loaders.ncep=smRender;
 
 /* ---------- 11 radar (IEM KMLB + NEXRAD mosaic) ---------- */
@@ -1087,6 +1247,9 @@ function rdLive(){
   if(rd.src!=="mos"){rdSet(L.tileLayer(IEM_T+"ridge::MLB-N0B-0/{z}/{x}/{y}.png?_="+bucket,{opacity:.75,maxNativeZoom:10,maxZoom:14,attribution:"Radar: Iowa Environmental Mesonet"}));$("#rdBadge").textContent="KMLB base reflectivity · latest";}
   else{rdSet(L.tileLayer(IEM_T+"nexrad-n0q-900913/{z}/{x}/{y}.png?_="+bucket,{opacity:.75,maxNativeZoom:9,maxZoom:14,attribution:"Radar: Iowa Environmental Mesonet"}));$("#rdBadge").textContent="NEXRAD mosaic · latest";}
   $("#rdMeta").textContent=stamp();
+  if(rd.src==="mos")fresh("radar",{t:Date.now(),label:"mosaic loaded"});
+  else{const iso=d=>d.toISOString().slice(0,16)+"Z";getJSON(`https://mesonet.agron.iastate.edu/json/radar.py?operation=list&radar=MLB&product=N0B&start=${iso(new Date(Date.now()-3*3600e3))}&end=${iso(new Date())}`,{accept:"application/json"})
+    .then(j=>{const s=(j.scans||[]).map(x=>Date.parse(x.ts)).filter(Number.isFinite);fresh("radar",s.length?{t:Math.max(...s),label:"KMLB scan"}:{err:"no KMLB scans in the last 3 h"})}).catch(e=>fresh("radar",{err:e.message}))}
 }
 async function rdFrames(){
   if(rd.src==="mos"){const out=[];for(let m=55;m>=5;m-=5)out.push({layer:`nexrad-n0q-900913-m${String(m).padStart(2,"0")}m`,maxz:9,t:Date.now()-m*60000,approx:true});out.push({layer:"nexrad-n0q-900913",maxz:9,t:Date.now(),approx:true});return out}
@@ -1176,8 +1339,8 @@ async function loadTropics(){
   g.appendChild(imgCell("2-day outlook","https://www.nhc.noaa.gov/xgtwo/two_atl_2d0.png","https://www.nhc.noaa.gov/gtwo.php?basin=atlc&fdays=2"));
   try{const l=await getJSON("https://api.weather.gov/products/types/TWO/locations/AT");const p=await getJSON(`https://api.weather.gov/products/${l["@graph"][0].id}`);
     const t=(p.productText||"").replace(/\r/g,"");const body=t.split(/\n\n/).slice(1).join("\n\n").replace(/^[\s\S]*?(?=For the North Atlantic)/,"").replace(/\n\$\$[\s\S]*$/,"").replace(/([^\n])\n(?=[^\n])/g,"$1 ").trim();
-    $("#trText").textContent=body||t;const it=new Date(p.issuanceTime);$("#trIss").textContent=`issued ${fmtL(it)} ET`;$("#trMeta").textContent=stamp()}
-  catch(e){$("#trText").textContent=`Couldn't load the outlook text: ${e.message}`}
+    $("#trText").textContent=body||t;const it=new Date(p.issuanceTime);$("#trIss").textContent=`issued ${fmtL(it)} ET`;$("#trMeta").textContent=stamp();fresh("tropics",{t:+it,label:"issued"})}
+  catch(e){$("#trText").textContent=`Couldn't load the outlook text: ${e.message}`;fresh("tropics",{err:e.message})}
 }
 loaders.tropics=loadTropics;$("#trRefresh").onclick=loadTropics;
 
@@ -1187,7 +1350,7 @@ const ST_BASE="https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/se/";
 let st={band:store.get("st.band","GEOCOLOR"),loop:false,timer:null,frames:[],idx:0};
 $("#stBand").innerHTML=ST_BANDS.map(([k,l])=>`<button type="button" data-k="${k}">${l}</button>`).join("");
 const stStamp=n=>{const m=n.match(/^(\d{4})(\d{3})(\d\d)(\d\d)/);if(!m)return null;const d=new Date(Date.UTC(+m[1],0,1,+m[3],+m[4]));d.setUTCDate(+m[2]);return d};
-function stStill(){stStop();[...$("#stBand").children].forEach(b=>b.classList.toggle("on",b.dataset.k===st.band));
+function stStill(){stStop();fresh("sat",{t:Date.now(),label:"loaded"});[...$("#stBand").children].forEach(b=>b.classList.toggle("on",b.dataset.k===st.band));
   const lbl=ST_BANDS.find(b=>b[0]===st.band)[1];$("#stTitle").textContent=`GOES-East ${lbl} · latest`;$("#stTime").textContent=stamp();
   setImg($("#stBox"),`${ST_BASE}${st.band}/latest.jpg`,`${ST_BASE}${st.band}/`)}
 async function stStart(){st.loop=true;$("#stLoop").textContent="Stop";$("#stTime").textContent="loading loop…";
@@ -1366,8 +1529,8 @@ async function loadMeteogram(){
     const kmh=p.windSpeed?.uom?.includes("km_h")!==false;
     mg={T:expandGrid(p.temperature,c2f),D:expandGrid(p.dewpoint,c2f),W:expandGrid(p.windSpeed,v=>kmh?v*0.539957:v),G:expandGrid(p.windGust,v=>kmh?v*0.539957:v),
         P:expandGrid(p.probabilityOfPrecipitation,v=>v),S:expandGrid(p.skyCover,v=>v),upd:new Date(p.updateTime)};
-    $("#mgMeta").textContent=`${pt.properties.gridId} ${pt.properties.gridX},${pt.properties.gridY} · grid updated ${fmtZ(mg.upd)}`;drawMeteogram();
-  }catch(e){$("#mgMeta").textContent=`Couldn't load the NWS grid: ${e.message}`}
+    $("#mgMeta").textContent=`${pt.properties.gridId} ${pt.properties.gridX},${pt.properties.gridY} · grid updated ${fmtZ(mg.upd)}`;drawMeteogram();fresh("meteogram",{t:+mg.upd,label:"NWS grid"});
+  }catch(e){$("#mgMeta").textContent=`Couldn't load the NWS grid: ${e.message}`;fresh("meteogram",{err:e.message})}
 }
 function drawMeteogram(){if(!mg)return;const cv=$("#mgChart");if(!cv.clientWidth)return;
   const t0=Math.floor(Date.now()/3600e3)*3600e3-2*3600e3,t1=t0+(mgSpan+2)*3600e3;
@@ -1397,12 +1560,12 @@ async function loadSPC(){
   $("#spc48").innerHTML="";$("#spc48").appendChild(imgCell("Days 4–8 severe probability",SPC+"exper/day4-8/day48prob.gif",SPC+"exper/day4-8/"));
   const box=$("#spcCape");box.innerHTML=[1,2,3].map(d=>`<div class="sum" id="spcR${d}"><span>Day ${d} · Cape</span><b>…</b></div>`).join("");
   await Promise.all([1,2,3].map(async d=>{const el=$("#spcR"+d);
-    try{const {best,meta}=await spcCapeRisk(d);
+    try{const {best,meta}=await spcCapeRisk(d);if(d===1)fresh("spc",meta?.ISSUE_ISO?{t:Date.parse(meta.ISSUE_ISO),label:"Day 1 issued"}:{err:"no Day 1 issue time"});
       const lbl=best?best.LABEL:"NONE",txt=best?best.LABEL2:"No thunderstorms forecast",fill=best?best.fill:"transparent";
       const v=meta?.VALID_ISO?new Date(meta.VALID_ISO):null,x=meta?.EXPIRE_ISO?new Date(meta.EXPIRE_ISO):null;
       el.style.borderLeft=`6px solid ${best?best.stroke:"var(--line2)"}`;
       el.innerHTML=`<span>Day ${d} · Cape Canaveral</span><b><span class="risk" style="background:${esc(fill)}${best?"":";color:var(--muted)"}">${esc(lbl)}</span></b><em>${esc(txt)}${v?` · ${fmtZ(v)}–${fmtZ(x)}`:""}</em>`}
-    catch(e){el.innerHTML=`<span>Day ${d} · Cape</span><b>—</b><em class="err">${esc(e.message)}</em>`}}));
+    catch(e){el.innerHTML=`<span>Day ${d} · Cape</span><b>—</b><em class="err">${esc(e.message)}</em>`;if(d===1)fresh("spc",{err:e.message})}}));
 }
 /* WPC Excessive Rainfall Outlook: Days 1-3. WPC posts only CONUS images, so the Southeast view crops each one
    (800x561) and lays WPC's own valid-time box and category key back over the open ocean / Gulf corners. */
