@@ -449,6 +449,7 @@ tr.manual td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
     <li><b>Heavy rain / flooding</b> — NWS rainfall total (QPF) for the day: 0.25″ Low, 1″ Moderate, 2″ High.</li>
     <li><b>Temperature</b> — heat index 98° / 103° / 108°, or low temperature 45° / 38° / 32°.</li>
     <li><b>Marine &amp; coastal</b> — seas and gusts ~12 nm offshore: 5 / 7 / 10 ft, or 20 / 25 / 34 kt.</li>
+    <li><b>Tropical</b> — NWS chance of tropical-storm-force winds at the Cape: 5% Low, 20% Moderate, 50% High (or hurricane-force 5% Moderate, 20% High). Tropical storm, hurricane and storm surge watches set Moderate and warnings High. Today also notes the NHC Atlantic 7-day outlook, which covers the whole basin so it doesn't set the level.</li>
     <li>Active NWS watches, warnings and advisories (severe, flood, wind, heat/freeze, small craft, gale, rip current…) raise the matching row on the days they cover.</li>
     <li>Today only counts the hours left in the day. The data refreshes each time you open the slide if it is over 30 minutes old.</li></ul><p class="note">Cells marked ✎ were set by the forecaster and are never changed by the data. Click outside or press Esc to close.</p><button class="btn sm khclose" type="button">Close</button></div></template>
 </div>
@@ -1188,7 +1189,7 @@ loaders.models=windyRender;
 
 /* ---------- Threat matrix: Today / Tomorrow / Day 3. A first guess is filled from NWS grid forecasts, SPC outlooks and
    active NWS alerts; any cell the forecaster clicks is theirs (marked ✎) and is never overwritten by a data refresh. ---------- */
-const TH_ROWS=[["ltg","Lightning"],["wind","Surface winds"],["aloft","Winds aloft (≤400 ft)"],["svr","Severe / hail"],["rain","Heavy rain / flooding"],["temp","Temperature"],["marine","Marine & coastal"]];
+const TH_ROWS=[["ltg","Lightning"],["wind","Surface winds"],["aloft","Winds aloft (≤400 ft)"],["svr","Severe / hail"],["rain","Heavy rain / flooding"],["temp","Temperature"],["marine","Marine & coastal"],["trop","Tropical"]];
 const TH_LV=["None","Low","Moderate","High"],DAYMS=864e5,TH_OFF={lat:28.45,lon:-80.35}; // TH_OFF: a sea point ~12 nm off the Cape for seas
 let thDay="",th=null,thPending=null,thBusy=false;
 const thKey=d=>"thr."+d,tri=v=>[v,v,v];
@@ -1234,7 +1235,7 @@ const thMin=(a,d)=>{const v=a.filter(([t])=>etDay(t)===d&&t>=Date.now()-3600e3).
 const thSum=(a,d)=>{const v=a.filter(([t])=>etDay(t)===d&&t>=Date.now()-3600e3);return v.length?v.reduce((s,x)=>s+x[1]/x[2],0):null};
 const lvAt=(v,cuts)=>v==null?0:cuts.filter(c=>v>=c).length; // cuts = [low, moderate, high]
 const SPC_LV={TSTM:0,MRGL:1,SLGT:2,ENH:3,MDT:3,HIGH:3};
-const ALERT_RULES=[[/coastal flood|rip current|high surf|small craft/i,"marine",2],[/tornado warning|severe thunderstorm warning/i,"svr",3],[/tornado watch|severe thunderstorm watch/i,"svr",2],
+const ALERT_RULES=[[/hurricane warning|storm surge warning|tropical storm warning/i,"trop",3],[/hurricane watch|storm surge watch|tropical storm watch/i,"trop",2],[/hurricane local statement|tropical/i,"trop",1],[/coastal flood|rip current|high surf|small craft/i,"marine",2],[/tornado warning|severe thunderstorm warning/i,"svr",3],[/tornado watch|severe thunderstorm watch/i,"svr",2],
   [/flash flood warning|flood warning/i,"rain",3],[/flood watch|flash flood watch/i,"rain",2],[/flood advisory/i,"rain",2],
   [/high wind warning|hurricane|tropical storm warning|extreme wind/i,"wind",3],[/wind advisory|tropical storm watch|hurricane watch/i,"wind",2],
   [/excessive heat|extreme heat|hard freeze|freeze warning|extreme cold/i,"temp",3],[/heat advisory|freeze watch|frost|cold weather advisory|wind chill/i,"temp",2],
@@ -1245,8 +1246,9 @@ async function thAutoRun(){
   const kt=u=>u?.includes("km_h")?v=>v*0.539957:v=>v,f=v=>v*9/5+32;
   const grid=async(lat,lon)=>{const pt=await getJSON(`https://api.weather.gov/points/${lat},${lon}`);return (await getJSON(pt.properties.forecastGridData)).properties};
   const lowJet=getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${CAPE.lat}&longitude=${CAPE.lon}&hourly=wind_speed_10m,wind_speed_80m,wind_speed_100m,wind_speed_120m,wind_direction_120m,wind_gusts_10m&wind_speed_unit=kn&timezone=GMT&forecast_days=5&models=gfs_seamless`,{accept:"application/json"});
-  const [g,o,spc,al,lj]=await Promise.allSettled([grid(CAPE.lat,CAPE.lon),grid(TH_OFF.lat,TH_OFF.lon),Promise.all([1,2,3].map(d=>spcCapeRisk(d).then(r=>r.best?.LABEL||"none").catch(()=>null))),
-    Promise.all([CAPE,TH_OFF].map(p=>getJSON(`https://api.weather.gov/alerts/active?point=${p.lat},${p.lon}`).then(j=>j.features).catch(()=>[]))),lowJet]);
+  const two=getJSON("https://api.weather.gov/products/types/TWO/locations/AT").then(l=>getJSON(`https://api.weather.gov/products/${l["@graph"][0].id}`));
+  const [g,o,spc,al,lj,tw]=await Promise.allSettled([grid(CAPE.lat,CAPE.lon),grid(TH_OFF.lat,TH_OFF.lon),Promise.all([1,2,3].map(d=>spcCapeRisk(d).then(r=>r.best?.LABEL||"none").catch(()=>null))),
+    Promise.all([CAPE,TH_OFF].map(p=>getJSON(`https://api.weather.gov/alerts/active?point=${p.lat},${p.lon}`).then(j=>j.features).catch(()=>[]))),lowJet,two]);
   const add=(k,i,lv,r)=>{got[k]??=[[0,""],[0,""],[0,""]];const c=got[k][i];if(r)c[1]=c[1]?c[1]+" · "+r:r;c[0]=Math.max(c[0],lv)};
   if(g.status==="fulfilled"){const p=g.value,tw=kt(p.windGust?.uom);
     const thun=thSeries(p.probabilityOfThunder),gust=thSeries(p.windGust,tw),sus=thSeries(p.windSpeed,kt(p.windSpeed?.uom)),qpf=thSeries(p.quantitativePrecipitation,v=>v/25.4),
@@ -1257,6 +1259,8 @@ async function thAutoRun(){
       add("wind",i,s_==null&&g_==null?0:(s_??0)>=35||(g_??0)>=35?3:(s_??0)>=18||(g_??0)>=25?2:1,S==null&&G==null?"no wind data":`sustained ${S==null?"—":Math.round(S)} kt · gusts ${G==null?"—":Math.round(G)} kt`);
       add("rain",i,lvAt(Q,[.25,1,2]),Q==null?"no QPF":`QPF ${Q.toFixed(2)}″${P!=null?` · PoP ${Math.round(P)}%`:""}`);
       const ht=lvAt(H,[98,103,108]),cd=lvAt(N==null?null:-N,[-45,-38,-32]);
+      const TS=thMax(thSeries(p.probabilityOfTropicalStormWinds),d),HU=thMax(thSeries(p.probabilityOfHurricaneWinds),d);
+      add("trop",i,(HU??0)>=20||(TS??0)>=50?3:(HU??0)>=5||(TS??0)>=20?2:(TS??0)>=5?1:0,TS==null&&HU==null?"no tropical wind threat":`TS-force winds ${Math.round(TS??0)}%${HU?` · hurricane ${Math.round(HU)}%`:""}`);
       add("temp",i,Math.max(ht,cd),X==null?"no temps":`${Math.round(X)}° / ${Math.round(N)}°${H!=null&&H>X+1?` · HI ${Math.round(H)}°`:""}`)})}
   else why.push("NWS grid");
   // winds aloft: GFS gusts estimated at 262/328/394 ft = sustained at that height + the 33 ft gust excess (same method as Wind Analysis)
@@ -1272,6 +1276,11 @@ async function thAutoRun(){
     days.forEach((d,i)=>{const W=thMax(w,d),G=thMax(og,d),lv=Math.max(lvAt(W,[5,7,10]),lvAt(G,[20,25,34]));
       add("marine",i,lv,W==null&&G==null?"no marine data":`seas ${W==null?"—":Math.round(W)} ft · gusts ${G==null?"—":Math.round(G)} kt`)})}
   else why.push("offshore grid");
+  // NHC Atlantic outlook: noted on Today (it covers the whole basin, so it informs but does not set the level)
+  if(tw.status==="fulfilled"){const p=tw.value,t=(p.productText||"").replace(/\s+/g," "),age=Date.now()-Date.parse(p.issuanceTime);
+    const pc=[...t.matchAll(/through 7 days[.\s]*\w+[.\s]*(\d+) percent/gi)].map(m=>+m[1]);
+    add("trop",0,0,age>2*DAYMS?"NHC outlooks paused (off-season)":/not expected during the next 7 days/i.test(t)&&!pc.length?"NHC: no development expected in 7 days":pc.length?`NHC: ${pc.length} area${pc.length>1?"s":""} in Atlantic, up to ${Math.max(...pc)}% in 7 days`:"NHC outlook: see Tropics")}
+  else why.push("NHC outlook");
   if(spc.status==="fulfilled")spc.value.forEach((c,i)=>{if(c==null){why.push(`SPC Day ${i+1}`);return}
     const lv=SPC_LV[c]??0;add("svr",i,lv,c==="none"?"SPC no thunder":`SPC ${c}`);if(c!=="none")add("ltg",i,c==="TSTM"?1:2,c==="TSTM"?"SPC thunder area":`SPC ${c}`)});
   const seen=new Set(),alr={other:[]};for(const [k] of TH_ROWS)alr[k]=[];
